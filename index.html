@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Learning Club</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+
+    <div class="game-container">
+        <div id="home-screen" class="screen">
+            <h1>🎨 Learning Club 🚀</h1>
+            <p>Pick a subject to start!</p>
+            <div class="subject-grid">
+                <button class="sub-btn" onclick="startQuiz('Tamil')">📜 Tamil</button>
+                <button class="sub-btn" onclick="startQuiz('English')">🔤 English</button>
+                <button class="sub-btn" onclick="startQuiz('Maths')">🔢 Maths</button>
+                <button class="sub-btn" onclick="startQuiz('Science')">🧪 Science</button>
+                <button class="sub-btn" onclick="startQuiz('GK')">🌍 GK</button>
+            </div>
+        </div>
+
+        <div id="quiz-screen" class="screen hidden">
+            <div class="quiz-header">
+                <button class="restart-small-btn" onclick="location.reload()">🏠 Home</button>
+                <h2 id="quiz-title">Subject</h2>
+            </div>
+            <div id="question-container">
+                <p id="question-count"></p>
+                <p id="question-text">Question?</p>
+                <div id="answer-buttons" class="btn-grid"></div>
+            </div>
+            <button id="next-btn" class="action-btn" onclick="nextQuestion()">Next Question ➡️</button>
+        </div>
+
+        <div id="results-screen" class="screen hidden">
+            <h2>Quiz Finished! 🏁</h2>
+            <div id="score-summary"></div>
+            <div id="answers-review"></div>
+            <div class="button-group">
+                <button class="action-btn" onclick="goToNameScreen()">Get Certificate! 🏆</button>
+                <button class="restart-btn" onclick="location.reload()"
+                    style="background:var(--gray); color:var(--dark); padding: 10px 20px; border-radius: 20px; margin-top:10px;">Restart
+                    🏠</button>
+            </div>
+        </div>
+
+        <div id="name-screen" class="screen hidden">
+            <h2>Great Job! 🎉</h2>
+            <p>Enter your name for the award:</p>
+            <input type="text" id="child-name" placeholder="Your Name">
+            <button class="action-btn" onclick="showCertificate()">Show Certificate</button>
+        </div>
+
+        <div id="certificate-screen" class="screen hidden">
+            <div id="certificate-download-area">
+                <div class="certificate">
+                    <div class="cert-border">
+                        <h3>SUPER STAR AWARD</h3>
+                        <h2 id="cert-name-display">Name</h2>
+                        <p>Completed the <span id="cert-subject"></span> Quiz</p>
+                        <div class="score-badge" id="cert-score">0/5</div>
+                        <p>Excellent Work! 🌟</p>
+                    </div>
+                </div>
+            </div>
+            <button class="action-btn" style="background: var(--secondary);" onclick="downloadCertificate()">Download
+                PDF 📥</button>
+            <button class="action-btn" onclick="location.reload()">Play Again! 🏠</button>
+        </div>
+
+        <div id="custom-popup" class="overlay hidden">
+            <div class="alert-box">
+                <span>🤔</span>
+                <p>Oops! Please pick an answer first!</p>
+                <button onclick="closePopup()">OK!</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

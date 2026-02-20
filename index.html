@@ -18,23 +18,54 @@
             <h1>🎨 Learning Club 🚀</h1>
             <p>Pick a subject to start!</p>
             <div class="subject-grid">
-                <button class="sub-btn" onclick="startQuiz('Tamil')">📜 Tamil</button>
-                <button class="sub-btn" onclick="startQuiz('English')">🔤 English</button>
-                <button class="sub-btn" onclick="startQuiz('Maths')">🔢 Maths</button>
-                <button class="sub-btn" onclick="startQuiz('Science')">🧪 Science</button>
-                <button class="sub-btn" onclick="startQuiz('GK')">🌍 GK</button>
+                <button class="sub-btn" onclick="showProfileForm('Tamil')">📜 Tamil</button>
+                <button class="sub-btn" onclick="showProfileForm('English')">🔤 English</button>
+                <button class="sub-btn" onclick="showProfileForm('Maths')">🔢 Maths</button>
+                <button class="sub-btn" onclick="showProfileForm('Science')">🧪 Science</button>
+                <button class="sub-btn" onclick="showProfileForm('GK')">🌍 GK</button>
+            </div>
+        </div>
+
+        <div id="profile-form-screen" class="screen hidden">
+            <h2>✨ Let's Get to Know You! ✨</h2>
+            <div class="profile-form-container">
+                <div class="avatar-preview">
+                    <div class="avatar-circle" id="avatar-preview">🧒</div>
+                </div>
+                <input type="text" id="child-name-input" placeholder="Your Name" class="profile-input">
+                <input type="number" id="child-age-input" placeholder="Your Age" min="2" max="12" class="profile-input">
+                <div class="avatar-selector">
+                    <p>Choose your avatar:</p>
+                    <div class="avatar-options">
+                        <span class="avatar-option" onclick="selectAvatar('🧒')">🧒</span>
+                        <span class="avatar-option" onclick="selectAvatar('👧')">👧</span>
+                        <span class="avatar-option" onclick="selectAvatar('🧑')">🧑</span>
+                        <span class="avatar-option" onclick="selectAvatar('👦')">👦</span>
+                        <span class="avatar-option" onclick="selectAvatar('👨‍🎓')">👨‍🎓</span>
+                        <span class="avatar-option" onclick="selectAvatar('👩‍🎓')">👩‍🎓</span>
+                    </div>
+                </div>
+                <button class="action-btn" onclick="submitProfile()">Start Learning! 🚀</button>
             </div>
         </div>
 
         <div id="quiz-screen" class="screen hidden">
             <div class="quiz-header">
                 <button class="restart-small-btn" onclick="location.reload()">🏠 Home</button>
-                <h2 id="quiz-title">Subject</h2>
+                <div class="profile-badge" id="profile-badge">
+                    <span class="profile-icon" id="header-avatar">🧒</span>
+                    <span class="profile-name" id="header-name">Friend</span>
+                    <span class="profile-age" id="header-age">5 yrs</span>
+                </div>
             </div>
+            <h2 id="quiz-title">Subject</h2>
             <div id="question-container">
                 <p id="question-count"></p>
+                <div class="question-image-container">
+                    <img id="question-image" src="" alt="Question Image" class="question-image">
+                </div>
                 <p id="question-text">Question?</p>
-                <div id="answer-buttons" class="btn-grid"></div>
+                <div id="answer-buttons" class="btn-grid-2x2"></div>
             </div>
             <button id="next-btn" class="action-btn" onclick="nextQuestion()">Next Question ➡️</button>
         </div>
@@ -53,8 +84,7 @@
 
         <div id="name-screen" class="screen hidden">
             <h2>Great Job! 🎉</h2>
-            <p>Enter your name for the award:</p>
-            <input type="text" id="child-name" placeholder="Your Name">
+            <input type="text" id="child-name" placeholder="Your Name" style="display: none;">
             <button class="action-btn" onclick="showCertificate()">Show Certificate</button>
         </div>
 
@@ -65,7 +95,7 @@
                         <h3>SUPER STAR AWARD</h3>
                         <h2 id="cert-name-display">Name</h2>
                         <p>Completed the <span id="cert-subject"></span> Quiz</p>
-                        <div class="score-badge" id="cert-score">0/5</div>
+                        <div class="score-badge" id="cert-score">0/15</div>
                         <p>Excellent Work! 🌟</p>
                     </div>
                 </div>
@@ -78,7 +108,7 @@
         <div id="custom-popup" class="overlay hidden">
             <div class="alert-box">
                 <span>🤔</span>
-                <p>Oops! Please pick an answer first!</p>
+                <p>Oops! Please fill all details first!</p>
                 <button onclick="closePopup()">OK!</button>
             </div>
         </div>

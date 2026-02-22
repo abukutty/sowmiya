@@ -4,19 +4,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kids Learning Club</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap"
+    <title>Kids Learning Club – Balloon Bonanza (with Answer Review)</title>
+    <!-- fonts & pdf library -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;800&display=swap"
         rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
+<link rel="stylesheet" href="style.css">
 
 <body>
+    <!-- balloon background -->
+    <div class="balloon-bg">
+        <div class="balloon"></div>
+        <div class="balloon"></div>
+        <div class="balloon"></div>
+        <div class="balloon"></div>
+        <div class="balloon"></div>
+        <div class="balloon"></div>
+        <div class="balloon"></div>
+        <div class="balloon"></div>
+    </div>
 
     <div class="game-container">
-        <div id="home-screen" class="screen">
+        <!-- start screen -->
+        <div id="start-screen" class="screen">
+            <div class="start-mascot">🌈✨</div>
+            <h1 style="font-size: 3rem;">KIDS CLUB</h1>
+            <p style="font-size: 1.5rem; color:#30204b;">Ready for fun?</p>
+            <button class="action-btn" style="background:#ffb347; width:70%; margin-top:30px;"
+                onclick="startApp()">Let's Go ➡️</button>
+            <div style="margin-top: 15px;">⭐ 🎈 🧸</div>
+        </div>
+
+        <!-- home / subject screen -->
+        <div id="home-screen" class="screen hidden">
             <h1>🎨 Learning Club 🚀</h1>
-            <p>Pick a subject to start!</p>
+            <p>Pick a subject!</p>
             <div class="subject-grid">
                 <button class="sub-btn" onclick="showProfileForm('Tamil')">📜 Tamil</button>
                 <button class="sub-btn" onclick="showProfileForm('English')">🔤 English</button>
@@ -26,90 +49,128 @@
             </div>
         </div>
 
+        <!-- profile screen -->
         <div id="profile-form-screen" class="screen hidden">
+            <div class="header-nav"><button class="restart-small-btn" onclick="location.reload()">⬅ Back</button></div>
             <h2>✨ Let's Get to Know You! ✨</h2>
-            <div class="profile-form-container">
-                <div class="avatar-preview">
-                    <div class="avatar-circle" id="avatar-preview">🧒</div>
-                </div>
-                <input type="text" id="child-name-input" placeholder="Your Name" class="profile-input">
-                <input type="number" id="child-age-input" placeholder="Your Age" min="2" max="12" class="profile-input">
-                <div class="avatar-selector">
-                    <p>Choose your avatar:</p>
-                    <div class="avatar-options">
-                        <span class="avatar-option" onclick="selectAvatar('🧒')">🧒</span>
-                        <span class="avatar-option" onclick="selectAvatar('👧')">👧</span>
-                        <span class="avatar-option" onclick="selectAvatar('🧑')">🧑</span>
-                        <span class="avatar-option" onclick="selectAvatar('👦')">👦</span>
-                        <span class="avatar-option" onclick="selectAvatar('👨‍🎓')">👨‍🎓</span>
-                        <span class="avatar-option" onclick="selectAvatar('👩‍🎓')">👩‍🎓</span>
-                    </div>
-                </div>
-                <button class="action-btn" onclick="submitProfile()">Start Learning! 🚀</button>
+            <div class="avatar-preview">
+                <div class="avatar-circle" id="avatar-preview">🧒</div>
             </div>
+            <input type="text" id="child-name-input" placeholder="Your Name" class="profile-input">
+            <input type="number" id="child-age-input" placeholder="Your Age" min="2" max="12" class="profile-input">
+            <div class="avatar-selector">
+                <p>Choose avatar:</p>
+                <div class="avatar-options">
+                    <span class="avatar-option" onclick="selectAvatar('🧒')">🧒</span>
+                    <span class="avatar-option" onclick="selectAvatar('👧')">👧</span>
+                    <span class="avatar-option" onclick="selectAvatar('🧑')">🧑</span>
+                    <span class="avatar-option" onclick="selectAvatar('👦')">👦</span>
+                    <span class="avatar-option" onclick="selectAvatar('👨‍🎓')">👨‍🎓</span>
+                    <span class="avatar-option" onclick="selectAvatar('👩‍🎓')">👩‍🎓</span>
+                </div>
+            </div>
+            <button class="action-btn" onclick="submitProfile()">Start Learning! 🚀</button>
         </div>
 
+        <!-- quiz screen -->
         <div id="quiz-screen" class="screen hidden">
             <div class="quiz-header">
                 <button class="restart-small-btn" onclick="location.reload()">🏠 Home</button>
-                <div class="profile-badge" id="profile-badge">
-                    <span class="profile-icon" id="header-avatar">🧒</span>
-                    <span class="profile-name" id="header-name">Friend</span>
-                    <span class="profile-age" id="header-age">5 yrs</span>
-                </div>
+                <div class="profile-badge"><span class="profile-icon" id="header-avatar">🧒</span><span
+                        class="profile-name" id="header-name">Friend</span><span class="profile-age" id="header-age">5
+                        yrs</span></div>
             </div>
             <h2 id="quiz-title">Subject</h2>
             <div id="question-container">
                 <p id="question-count"></p>
-                <div class="question-image-container">
-                    <img id="question-image" src="" alt="Question Image" class="question-image">
-                </div>
+                <div class="question-image-container"><img id="question-image" src="demo.jpeg" alt="Question Image"
+                        class="question-image"></div>
                 <p id="question-text">Question?</p>
                 <div id="answer-buttons" class="btn-grid-2x2"></div>
             </div>
-            <button id="next-btn" class="action-btn" onclick="nextQuestion()">Next Question ➡️</button>
+            <div class="nav-btn-container">
+                <button id="prev-btn" class="nav-btn prev" onclick="prevQuestion()">⬅ Back</button>
+                <button id="next-btn" class="nav-btn next" onclick="nextQuestion()">Next ➡</button>
+            </div>
         </div>
 
+        <!-- results screen with answer review -->
         <div id="results-screen" class="screen hidden">
             <h2>Quiz Finished! 🏁</h2>
             <div id="score-summary"></div>
             <div id="answers-review"></div>
-            <div class="button-group">
-                <button class="action-btn" onclick="goToNameScreen()">Get Certificate! 🏆</button>
-                <button class="restart-btn" onclick="location.reload()"
-                    style="background:var(--gray); color:var(--dark); padding: 10px 20px; border-radius: 20px; margin-top:10px;">Restart
+            <div class="button-group" id="results-actions"></div>
+        </div>
+
+        <!-- certificate screen -->
+        <div id="certificate-screen" class="screen hidden">
+            <div id="certificate-download-area">
+                <div class="certificate">
+                    <span class="balloon-cert b1">🎈</span><span class="balloon-cert b2">🎈</span><span
+                        class="balloon-cert b3">🎈</span><span class="balloon-cert b4">🎈</span>
+                    <div class="cert-border">
+                        <h3>🏆 SUPER STAR AWARD 🏆</h3>
+                        <h2 id="cert-name-display">Name</h2>
+                        <p>Completed the <span id="cert-subject"></span> Quiz</p>
+                        <div class="score-badge" id="cert-score">0/15</div>
+                        <p>Excellent Work! 😍 🎈</p>
+                    </div>
+                </div>
+            </div>
+            <div class="button-group" style="margin-top:20px;">
+                <button class="action-btn" style="background:#0d9488;" onclick="downloadCertificate()">Download PDF
+                    📥</button>
+                <button class="action-btn" style="background:#f97316;" onclick="location.reload()">Play Again!
                     🏠</button>
             </div>
         </div>
 
-        <div id="name-screen" class="screen hidden">
-            <h2>Great Job! 🎉</h2>
-            <input type="text" id="child-name" placeholder="Your Name" style="display: none;">
-            <button class="action-btn" onclick="showCertificate()">Show Certificate</button>
-        </div>
-
-        <div id="certificate-screen" class="screen hidden">
-            <div id="certificate-download-area">
-                <div class="certificate">
-                    <div class="cert-border">
-                        <h3>SUPER STAR AWARD</h3>
-                        <h2 id="cert-name-display">Name</h2>
-                        <p>Completed the <span id="cert-subject"></span> Quiz</p>
-                        <div class="score-badge" id="cert-score">0/15</div>
-                        <p>Excellent Work! 🌟</p>
-                    </div>
-                </div>
+        <!-- ========== KIDS THEME POPUPS ========== -->
+        <!-- Retake popup (⚠️ Oops!) -->
+        <div id="retake-popup" class="popup-overlay hidden">
+            <div class="popup-box">
+                <span class="popup-balloon left">🎈</span>
+                <span class="popup-balloon right">🎈</span>
+                <span class="popup-emoji">⚠️</span>
+                <h3>Oops!</h3>
+                <p>You answered 8 questions wrong. Please retake the quiz.</p>
+                <button onclick="retakeQuiz()">Retake Quiz 🔄</button>
             </div>
-            <button class="action-btn" style="background: var(--secondary);" onclick="downloadCertificate()">Download
-                PDF 📥</button>
-            <button class="action-btn" onclick="location.reload()">Play Again! 🏠</button>
         </div>
 
-        <div id="custom-popup" class="overlay hidden">
-            <div class="alert-box">
-                <span>🤔</span>
-                <p>Oops! Please fill all details first!</p>
-                <button onclick="closePopup()">OK!</button>
+        <!-- Validation popup (🤔 Hey!) for next without answer -->
+        <div id="validation-popup" class="popup-overlay hidden">
+            <div class="popup-box validation">
+                <span class="popup-balloon left">🎈</span>
+                <span class="popup-balloon right">🎈</span>
+                <span class="popup-emoji">🤔</span>
+                <h3>Hey!</h3>
+                <p>Please select an answer before going next.</p>
+                <button onclick="closeValidationPopup()">OK 👍</button>
+            </div>
+        </div>
+
+        <!-- Age validation popup (👶 Too Young!) -->
+        <div id="age-validation-popup" class="popup-overlay hidden">
+            <div class="popup-box validation">
+                <span class="popup-balloon left">🎈</span>
+                <span class="popup-balloon right">🎈</span>
+                <span class="popup-emoji">👶</span>
+                <h3>Oopsie!</h3>
+                <p>This quiz is for children aged 3 and above. You're too young for now! 🌈</p>
+                <button onclick="closeAgePopup()">OK 👍</button>
+            </div>
+        </div>
+
+        <!-- Missing Details popup (📝 Hey!) -->
+        <div id="missing-details-popup" class="popup-overlay hidden">
+            <div class="popup-box validation">
+                <span class="popup-balloon left">🎈</span>
+                <span class="popup-balloon right">🎈</span>
+                <span class="popup-emoji">📝</span>
+                <h3>Hey!</h3>
+                <p>Please fill in your name and age before starting!</p>
+                <button onclick="closeMissingDetailsPopup()">OK 👍</button>
             </div>
         </div>
     </div>

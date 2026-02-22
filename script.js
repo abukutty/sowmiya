@@ -458,7 +458,7 @@ function showLoadingIndicator() {
     loader.innerHTML = `
         <div class="spinner"></div>
         <p style="font-size: 1.2rem; color: #2d1b4e;">Generating your certificate...</p>
-        <p style="font-size: 1rem; color: #f97316; margin-top: 10px;">Please wait 4 seconds ⏱️</p>
+        <p style="font-size: 1rem; color: #f97316; margin-top: 10px;">Please wait . . . ⏱️</p>
     `;
     document.body.appendChild(loader);
 }
@@ -691,3 +691,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+

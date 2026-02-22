@@ -36,26 +36,16 @@ let finalScore = 0;
 let wrongCount = 0;
 const MAX_WRONG = 8;
 
-// ----- FIXED: Page Refresh Alert (only triggers on actual page reload) -----
-let isNavigatingInternally = false;
-
+// ----- NEW FEATURE: Page Refresh Alert -----
 window.addEventListener('beforeunload', function (e) {
-    // Don't show alert if we're navigating internally via our functions
-    if (isNavigatingInternally) {
-        return;
-    }
-    
     // Only show alert if user is in the middle of a quiz or has started the app
     const hasProgress = !document.getElementById('profile-form-screen').classList.contains('hidden') ||
                         !document.getElementById('quiz-screen').classList.contains('hidden') ||
                         !document.getElementById('results-screen').classList.contains('hidden') ||
                         !document.getElementById('certificate-screen').classList.contains('hidden');
     
-    // Also check if any answers have been selected
-    const hasAnswers = userAnswers && userAnswers.length > 0 && userAnswers.some(ans => ans !== null);
-    
-    if (hasProgress || hasAnswers || currentSubject !== "") {
-        // Show confirmation dialog for actual page refresh
+    if (hasProgress) {
+        // Show confirmation dialog
         e.preventDefault();
         e.returnValue = 'Are you sure you want to refresh? Your progress may be lost.';
         return 'Are you sure you want to refresh? Your progress may be lost.';
@@ -64,9 +54,6 @@ window.addEventListener('beforeunload', function (e) {
 
 // ----- FIXED: Home Button Without Refresh (goes to subject selection) -----
 function goHome() {
-    // Set flag to prevent beforeunload alert
-    isNavigatingInternally = true;
-    
     playSfx('click');
     
     // Hide all screens
@@ -103,11 +90,6 @@ function goHome() {
     document.getElementById('header-avatar').innerText = '🧒';
     document.getElementById('header-name').innerText = 'Friend';
     document.getElementById('header-age').innerText = '5 yrs';
-    
-    // Reset flag after a short delay
-    setTimeout(() => {
-        isNavigatingInternally = false;
-    }, 100);
 }
 
 // ----- FIXED: Play Again Function (goes to subject selection) -----

@@ -40,7 +40,8 @@ const MAX_WRONG = 8;
 window.addEventListener('beforeunload', function (e) {
     // Only show alert if user is in the middle of a quiz
     if (document.getElementById('quiz-screen') && 
-        !document.getElementById('quiz-screen').classList.contains('hidden')) {
+        !document.getElementById('quiz-screen').classList.contains('hidden') &&
+        currentQuestionIndex > 0) {
         e.preventDefault();
         e.returnValue = 'Are you sure you want to refresh? Your quiz progress will be lost!';
         return 'Are you sure you want to refresh? Your quiz progress will be lost!';
@@ -50,6 +51,7 @@ window.addEventListener('beforeunload', function (e) {
 // Initialize keyboard listeners when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     setupKeyboardListeners();
+    updateAvatarProfile();
 });
 
 function setupKeyboardListeners() {
@@ -69,6 +71,20 @@ function setupKeyboardListeners() {
     
     if (ageInput) {
         ageInput.addEventListener('keypress', handleInputKeyPress);
+    }
+}
+
+// Update avatar profile in bottom right
+function updateAvatarProfile() {
+    const avatarDisplay = document.getElementById('bottom-avatar');
+    const nameDisplay = document.getElementById('bottom-name');
+    const ageDisplay = document.getElementById('bottom-age');
+    
+    if (childProfile.name) {
+        avatarDisplay.innerText = childProfile.avatar;
+        nameDisplay.innerText = childProfile.name;
+        ageDisplay.innerText = childProfile.age + ' yrs';
+        document.getElementById('avatar-profile-bottom').classList.remove('hidden');
     }
 }
 
@@ -98,6 +114,24 @@ function startApp() {
     playSfx('click');
     document.getElementById('start-screen').classList.add('hidden');
     document.getElementById('home-screen').classList.remove('hidden');
+}
+
+// Go to home without refreshing
+function goToHome() {
+    playSfx('click');
+    // Hide all screens
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('home-screen').classList.remove('hidden');
+    document.getElementById('profile-form-screen').classList.add('hidden');
+    document.getElementById('quiz-screen').classList.add('hidden');
+    document.getElementById('results-screen').classList.add('hidden');
+    document.getElementById('certificate-screen').classList.add('hidden');
+    
+    // Reset quiz state but keep profile
+    currentSubject = "";
+    currentQuestionIndex = 0;
+    userAnswers = [];
+    wrongCount = 0;
 }
 
 // Popup controls
@@ -158,6 +192,7 @@ function selectAvatar(avatar) {
     document.getElementById('avatar-preview').innerText = avatar;
     document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
     event.target.classList.add('selected');
+    updateAvatarProfile();
 }
 
 function submitProfile() {
@@ -183,6 +218,7 @@ function submitProfile() {
     document.getElementById('quiz-title').innerText = currentSubject + ' Quiz';
     document.getElementById('profile-form-screen').classList.add('hidden');
     document.getElementById('quiz-screen').classList.remove('hidden');
+    updateAvatarProfile();
     startQuiz();
 }
 
@@ -278,12 +314,12 @@ function showResults() {
     if (score >= 8 && wrongCount < MAX_WRONG) {
         playSfx('win');
         actionsDiv.innerHTML = `<button class="action-btn" onclick="showCertDisplay()">Get Certificate! 🏆😊</button>
-                                <button class="action-btn" style="background:#ff9248;" onclick="location.reload()">Home 🏠</button>`;
+                                <button class="action-btn" style="background:#ff9248;" onclick="goToHome()">Home 🏠</button>`;
     } else {
         playSfx('error');
         actionsDiv.innerHTML = `<p style="color:#c0392b; font-weight:bold;">You need 8 marks to pass. Try again! 😢</p>
                                 <button class="action-btn" style="background:#e67e22;" onclick="retakeQuiz()">Retake Quiz 🔄</button>
-                                <button class="action-btn" style="background:#ff9248; margin-top:5px;" onclick="location.reload()">Home 🏠</button>`;
+                                <button class="action-btn" style="background:#ff9248; margin-top:5px;" onclick="goToHome()">Home 🏠</button>`;
     }
 }
 
@@ -293,6 +329,31 @@ function showCertDisplay() {
     document.getElementById('cert-name-display').innerText = childProfile.name;
     document.getElementById('cert-subject').innerText = currentSubject;
     document.getElementById('cert-score').innerText = finalScore + ' / 15';
+    
+    // Auto-load certificate after 3 seconds
+    setTimeout(function() {
+        if (!document.getElementById('certificate-screen').classList.contains('hidden')) {
+            // Certificate is still showing, trigger download or just show message
+            playSfx('win');
+            // You can either auto-download or just show a message
+            // Uncomment the next line if you want auto-download
+            // downloadCertificate();
+            
+            // Show a playful message instead
+            const certButtons = document.querySelector('#certificate-screen .button-group');
+            const messageEl = document.createElement('div');
+            messageEl.className = 'cert-ready-message';
+            messageEl.innerHTML = '🎉 Your certificate is ready! Click download below! 🎉';
+            messageEl.style.cssText = 'background: #4CAF50; color: white; padding: 15px; border-radius: 50px; margin: 10px auto; max-width: 90%; font-weight: bold; animation: bounce 1s infinite;';
+            
+            // Remove any existing message
+            const oldMessage = document.querySelector('.cert-ready-message');
+            if (oldMessage) oldMessage.remove();
+            
+            // Insert before buttons
+            certButtons.parentNode.insertBefore(messageEl, certButtons);
+        }
+    }, 3000);
 }
 
 function downloadCertificate() {
@@ -421,6 +482,7 @@ function fallbackDownload(element, isMobile) {
 
 // expose globals
 window.startApp = startApp;
+window.goToHome = goToHome;
 window.showProfileForm = showProfileForm;
 window.selectAvatar = selectAvatar;
 window.submitProfile = submitProfile;

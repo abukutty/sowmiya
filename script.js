@@ -400,7 +400,7 @@ function showManualScreenshotInstructions() {
     setTimeout(() => {
         const popup = document.querySelector('.popup-overlay:last-child');
         if (popup) popup.remove();
-    }, 6000);
+    }, 9000);
 }
 
 // Screenshot loading indicator
@@ -447,7 +447,7 @@ function showScreenshotSuccess() {
     setTimeout(() => {
         const popup = document.getElementById('screenshot-success-popup');
         if (popup) popup.remove();
-    }, 5000);
+    }, 9000);
 }
 
 // Loading indicator functions
@@ -496,7 +496,7 @@ function showMobileDownloadConfirmation() {
     setTimeout(() => {
         const popup = document.getElementById('download-success-popup');
         if (popup) popup.remove();
-    }, 8000);
+    }, 9000);
 }
 
 function showMobileErrorPopup() {
@@ -518,7 +518,7 @@ function showMobileErrorPopup() {
     setTimeout(() => {
         const popup = document.querySelector('.popup-overlay:last-child');
         if (popup) popup.remove();
-    }, 4000);
+    }, 9000);
 }
 
 // ----- FIXED: Mobile PDF Download with Proper Sizing -----
@@ -691,4 +691,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
 

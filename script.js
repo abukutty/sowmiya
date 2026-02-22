@@ -234,15 +234,65 @@ function showCertDisplay() {
 
 function downloadCertificate() {
     playSfx('download');
+    
     const element = document.getElementById('certificate-download-area');
-    html2pdf().from(element).set({
-        margin: 0.3,
-        filename: `${childProfile.name}_Award.pdf`,
-        html2canvas: { scale: 2, letterRendering: true, useCORS: true, logging: false },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
-    }).save();
+    
+    // Check if we're on a mobile device
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        // For mobile devices, use a different approach
+        html2pdf().from(element).set({
+            margin: 0.2,
+            filename: `${childProfile.name}_Award.pdf`,
+            html2canvas: { 
+                scale: 2, 
+                letterRendering: true, 
+                useCORS: true, 
+                logging: false,
+                allowTaint: false,
+                backgroundColor: '#ffffff'
+            },
+            jsPDF: { 
+                unit: 'in', 
+                format: 'a4', 
+                orientation: 'landscape',
+                compress: true
+            }
+        }).toPdf().get('pdf').then(function(pdf) {
+            // Convert PDF to blob and create download link
+            const blob = pdf.output('blob');
+            const url = URL.createObjectURL(blob);
+            
+            // Create a temporary link and trigger download
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${childProfile.name}_Award.pdf`;
+            link.style.display = 'none';
+            
+            // For iOS, we need to append to body
+            document.body.appendChild(link);
+            link.click();
+            
+            // Clean up
+            setTimeout(function() {
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }, 100);
+        }).catch(function(error) {
+            console.error('PDF generation failed:', error);
+            alert('Sorry, PDF download failed. Please try again or take a screenshot.');
+        });
+    } else {
+        // For desktop, use the original method
+        html2pdf().from(element).set({
+            margin: 0.3,
+            filename: `${childProfile.name}_Award.pdf`,
+            html2canvas: { scale: 2, letterRendering: true, useCORS: true, logging: false },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+        }).save();
+    }
 }
-
 // expose globals
 window.startApp = startApp;
 window.showProfileForm = showProfileForm;
@@ -256,3 +306,41 @@ window.retakeQuiz = retakeQuiz;
 window.closeValidationPopup = closeValidationPopup;
 window.closeAgePopup = closeAgePopup;
 window.closeMissingDetailsPopup = closeMissingDetailsPopup;
+
+// Handle Enter key on input fields
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('child-name-input');
+    const ageInput = document.getElementById('child-age-input');
+    
+    function handleInputKeyPress(e) {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            e.preventDefault(); // Prevent form submission
+            submitProfile(); // Call the submit function
+        }
+    }
+    
+    if (nameInput) {
+        nameInput.addEventListener('keypress', handleInputKeyPress);
+    }
+    
+    if (ageInput) {
+        ageInput.addEventListener('keypress', handleInputKeyPress);
+    }
+});
+function showLoadingIndicator() {
+    const loader = document.createElement('div');
+    loader.className = 'pdf-loading';
+    loader.id = 'pdf-loader';
+    loader.innerHTML = `
+        <div class="spinner"></div>
+        <p style="font-size: 1.2rem; color: #2d1b4e;">Generating your certificate...</p>
+    `;
+    document.body.appendChild(loader);
+}
+
+function hideLoadingIndicator() {
+    const loader = document.getElementById('pdf-loader');
+    if (loader) {
+        loader.remove();
+    }
+}

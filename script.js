@@ -1,4 +1,3 @@
-
 // ----- DATA (unchanged) -----
 const questionsData = {
     Maths: [{ q: "What is 1 + 1?", a: ["1", "2", "3", "4"], correct: "2", img: "demo.jpeg" }, { q: "What is 5 - 2?", a: ["2", "3", "4", "5"], correct: "3", img: "demo.jpeg" }, { q: "Which number is biggest?", a: ["10", "50", "30", "5"], correct: "50", img: "demo.jpeg" }, { q: "What is 2 + 2?", a: ["4", "5", "6", "2"], correct: "4", img: "demo.jpeg" }, { q: "What shape is a ball?", a: ["Square", "Circle", "Triangle", "Cube"], correct: "Circle", img: "demo.jpeg" }, { q: "How many sides does a triangle have?", a: ["1", "2", "3", "4"], correct: "3", img: "demo.jpeg" }, { q: "What is 10 + 10?", a: ["10", "20", "30", "40"], correct: "20", img: "demo.jpeg" }, { q: "What is half of 4?", a: ["1", "2", "3", "4"], correct: "2", img: "demo.jpeg" }, { q: "Which is smaller?", a: ["100", "10", "50", "80"], correct: "10", img: "demo.jpeg" }, { q: "What is 3 + 0?", a: ["0", "3", "30", "6"], correct: "3", img: "demo.jpeg" }, { q: "How many legs do 2 cats have?", a: ["4", "6", "8", "10"], correct: "8", img: "demo.jpeg" }, { q: "What is 5 + 5?", a: ["10", "15", "5", "20"], correct: "10", img: "demo.jpeg" }, { q: "What comes after 9?", a: ["8", "10", "11", "12"], correct: "10", img: "demo.jpeg" }, { q: "What is 2 x 2?", a: ["2", "4", "6", "8"], correct: "4", img: "demo.jpeg" }, { q: "Which is a pair?", a: ["1", "2", "3", "5"], correct: "2", img: "demo.jpeg" }],
@@ -36,6 +35,64 @@ let childProfile = { name: "", age: "", avatar: "🧒" };
 let finalScore = 0;
 let wrongCount = 0;
 const MAX_WRONG = 8;
+
+// Add refresh alert
+window.addEventListener('beforeunload', function (e) {
+    // Only show alert if user is in the middle of a quiz
+    if (document.getElementById('quiz-screen') && 
+        !document.getElementById('quiz-screen').classList.contains('hidden')) {
+        e.preventDefault();
+        e.returnValue = 'Are you sure you want to refresh? Your quiz progress will be lost!';
+        return 'Are you sure you want to refresh? Your quiz progress will be lost!';
+    }
+});
+
+// Initialize keyboard listeners when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    setupKeyboardListeners();
+});
+
+function setupKeyboardListeners() {
+    const nameInput = document.getElementById('child-name-input');
+    const ageInput = document.getElementById('child-age-input');
+    
+    function handleInputKeyPress(e) {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            e.preventDefault(); // Prevent any form submission
+            submitProfile(); // Call the submit function
+        }
+    }
+    
+    if (nameInput) {
+        nameInput.addEventListener('keypress', handleInputKeyPress);
+    }
+    
+    if (ageInput) {
+        ageInput.addEventListener('keypress', handleInputKeyPress);
+    }
+}
+
+// Show loading indicator for PDF
+function showLoadingIndicator() {
+    // Remove existing loader if any
+    hideLoadingIndicator();
+    
+    const loader = document.createElement('div');
+    loader.className = 'pdf-loading';
+    loader.id = 'pdf-loader';
+    loader.innerHTML = `
+        <div class="spinner"></div>
+        <p style="font-size: 1.2rem; color: #2d1b4e; background: white; padding: 15px; border-radius: 30px; box-shadow: 0 5px 0 rgba(0,0,0,0.1);">🎨 Creating your certificate... 🎈</p>
+    `;
+    document.body.appendChild(loader);
+}
+
+function hideLoadingIndicator() {
+    const loader = document.getElementById('pdf-loader');
+    if (loader) {
+        loader.remove();
+    }
+}
 
 function startApp() {
     playSfx('click');
@@ -90,6 +147,9 @@ function showProfileForm(subject) {
     currentSubject = subject;
     document.getElementById('home-screen').classList.add('hidden');
     document.getElementById('profile-form-screen').classList.remove('hidden');
+    
+    // Re-attach keyboard listeners
+    setupKeyboardListeners();
 }
 
 function selectAvatar(avatar) {
@@ -105,14 +165,14 @@ function submitProfile() {
     let age = document.getElementById('child-age-input').value.trim();
 
     if (!name || !age) {
-        showMissingDetailsPopup(); // Show popup instead of alert
+        showMissingDetailsPopup();
         return;
     }
 
     // Check if age is below 3
     if (parseInt(age) < 3) {
         showAgePopup();
-        return; // Don't proceed to quiz
+        return;
     }
 
     childProfile.name = name;
@@ -120,6 +180,7 @@ function submitProfile() {
     document.getElementById('header-avatar').innerText = childProfile.avatar;
     document.getElementById('header-name').innerText = childProfile.name;
     document.getElementById('header-age').innerText = childProfile.age + ' yrs';
+    document.getElementById('quiz-title').innerText = currentSubject + ' Quiz';
     document.getElementById('profile-form-screen').classList.add('hidden');
     document.getElementById('quiz-screen').classList.remove('hidden');
     startQuiz();
@@ -138,10 +199,12 @@ function showQuestion() {
     document.getElementById('question-text').innerText = qData.q;
     document.getElementById('question-image').src = qData.img || 'demo.jpeg';
     document.getElementById('prev-btn').style.visibility = currentQuestionIndex === 0 ? "hidden" : "visible";
-    let container = document.getElementById('answer-buttons'); container.innerHTML = '';
+    let container = document.getElementById('answer-buttons'); 
+    container.innerHTML = '';
     qData.a.forEach(ans => {
         let btn = document.createElement('button');
-        btn.innerText = ans; btn.classList.add('answer-btn');
+        btn.innerText = ans; 
+        btn.classList.add('answer-btn');
         if (userAnswers[currentQuestionIndex] === ans) btn.classList.add('selected');
         btn.onclick = () => {
             playSfx('click');
@@ -198,14 +261,14 @@ function showResults() {
         if (isCorrect) score++;
         let itemClass = isCorrect ? 'correct' : 'wrong';
         reviewHtml += `
-                    <div class="review-item ${itemClass}">
-                        <div class="review-question">${i + 1}. ${q.q}</div>
-                        <div>
-                            <span class="review-answer user-answer">Your answer: ${userAns}</span>
-                            ${!isCorrect ? `<span class="review-answer correct-answer">Correct: ${q.correct}</span>` : ''}
-                        </div>
-                    </div>
-                `;
+            <div class="review-item ${itemClass}">
+                <div class="review-question">${i + 1}. ${q.q}</div>
+                <div>
+                    <span class="review-answer user-answer">Your answer: ${userAns}</span>
+                    ${!isCorrect ? `<span class="review-answer correct-answer">Correct: ${q.correct}</span>` : ''}
+                </div>
+            </div>
+        `;
     }
     finalScore = score;
     document.getElementById('score-summary').innerHTML = `<h3>Score: ${score} / 15</h3>`;
@@ -215,12 +278,12 @@ function showResults() {
     if (score >= 8 && wrongCount < MAX_WRONG) {
         playSfx('win');
         actionsDiv.innerHTML = `<button class="action-btn" onclick="showCertDisplay()">Get Certificate! 🏆😊</button>
-                                        <button class="action-btn" style="background:#ff9248;" onclick="location.reload()">Home 🏠</button>`;
+                                <button class="action-btn" style="background:#ff9248;" onclick="location.reload()">Home 🏠</button>`;
     } else {
         playSfx('error');
         actionsDiv.innerHTML = `<p style="color:#c0392b; font-weight:bold;">You need 8 marks to pass. Try again! 😢</p>
-                                        <button class="action-btn" style="background:#e67e22;" onclick="retakeQuiz()">Retake Quiz 🔄</button>
-                                        <button class="action-btn" style="background:#ff9248; margin-top:5px;" onclick="location.reload()">Home 🏠</button>`;
+                                <button class="action-btn" style="background:#e67e22;" onclick="retakeQuiz()">Retake Quiz 🔄</button>
+                                <button class="action-btn" style="background:#ff9248; margin-top:5px;" onclick="location.reload()">Home 🏠</button>`;
     }
 }
 
@@ -234,65 +297,128 @@ function showCertDisplay() {
 
 function downloadCertificate() {
     playSfx('download');
+    showLoadingIndicator();
     
     const element = document.getElementById('certificate-download-area');
     
     // Check if we're on a mobile device
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    if (isMobile) {
-        // For mobile devices, use a different approach
-        html2pdf().from(element).set({
-            margin: 0.2,
-            filename: `${childProfile.name}_Award.pdf`,
-            html2canvas: { 
-                scale: 2, 
-                letterRendering: true, 
-                useCORS: true, 
-                logging: false,
-                allowTaint: false,
-                backgroundColor: '#ffffff'
-            },
-            jsPDF: { 
-                unit: 'in', 
-                format: 'a4', 
-                orientation: 'landscape',
-                compress: true
-            }
-        }).toPdf().get('pdf').then(function(pdf) {
-            // Convert PDF to blob and create download link
-            const blob = pdf.output('blob');
-            const url = URL.createObjectURL(blob);
+    // Configure html2pdf
+    const opt = {
+        margin: 0.2,
+        filename: `${childProfile.name}_Award.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2, 
+            letterRendering: true, 
+            useCORS: true, 
+            logging: false,
+            allowTaint: false,
+            backgroundColor: '#ffffff'
+        },
+        jsPDF: { 
+            unit: 'in', 
+            format: 'a4', 
+            orientation: 'landscape',
+            compress: true
+        }
+    };
+    
+    // Generate PDF
+    html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
+        hideLoadingIndicator();
+        
+        if (isMobile) {
+            // For mobile devices - create a blob and trigger download
+            const pdfBlob = pdf.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
             
-            // Create a temporary link and trigger download
+            // Create a temporary link
             const link = document.createElement('a');
-            link.href = url;
+            link.href = pdfUrl;
             link.download = `${childProfile.name}_Award.pdf`;
             link.style.display = 'none';
             
-            // For iOS, we need to append to body
+            // Append to body, click, and remove
             document.body.appendChild(link);
             link.click();
             
             // Clean up
             setTimeout(function() {
                 document.body.removeChild(link);
-                URL.revokeObjectURL(url);
+                URL.revokeObjectURL(pdfUrl);
+                
+                // Show success message
+                alert('✅ Certificate downloaded! Check your downloads folder.');
             }, 100);
-        }).catch(function(error) {
-            console.error('PDF generation failed:', error);
-            alert('Sorry, PDF download failed. Please try again or take a screenshot.');
-        });
-    } else {
-        // For desktop, use the original method
-        html2pdf().from(element).set({
-            margin: 0.3,
+        } else {
+            // For desktop - use save method
+            pdf.save(`${childProfile.name}_Award.pdf`);
+        }
+    }).catch(function(error) {
+        hideLoadingIndicator();
+        console.error('PDF generation failed:', error);
+        
+        // Fallback method
+        fallbackDownload(element, isMobile);
+    });
+}
+
+// Fallback download method
+function fallbackDownload(element, isMobile) {
+    try {
+        alert('Trying alternative download method...');
+        
+        const opt = {
+            margin: 0.2,
             filename: `${childProfile.name}_Award.pdf`,
-            html2canvas: { scale: 2, letterRendering: true, useCORS: true, logging: false },
+            html2canvas: { scale: 1.5, useCORS: true },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
-        }).save();
+        };
+        
+        if (isMobile) {
+            // For mobile, open in new window
+            html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
+                const pdfData = pdf.output('datauristring');
+                const newWindow = window.open();
+                if (newWindow) {
+                    newWindow.document.write(`
+                        <html>
+                            <head>
+                                <title>${childProfile.name}_Award.pdf</title>
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <style>
+                                    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background: linear-gradient(145deg, #fbc2eb, #a6c1ee); }
+                                    .container { background: white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 0 rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
+                                    h2 { color: #2d1b4e; }
+                                    .download-btn { display: inline-block; padding: 15px 30px; background: #4CAF50; color: white; text-decoration: none; border-radius: 50px; font-size: 20px; margin: 20px 0; border: none; box-shadow: 0 5px 0 #2d6a4f; }
+                                    .download-btn:active { transform: translateY(5px); box-shadow: none; }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="container">
+                                    <h2>🎉 Your Certificate is Ready! 🎉</h2>
+                                    <p style="font-size: 18px;">Click the button below to download:</p>
+                                    <a href="${pdfData}" download="${childProfile.name}_Award.pdf" class="download-btn">📥 Download PDF</a>
+                                    <p style="margin-top: 20px; color: #666;">Or long press and select "Download"</p>
+                                    <button onclick="window.close()" style="padding:10px 20px; background:#f97316; color:white; border:none; border-radius:30px; margin-top:10px;">Close</button>
+                                </div>
+                            </body>
+                        </html>
+                    `);
+                    newWindow.document.close();
+                }
+            });
+        } else {
+            html2pdf().set(opt).from(element).save();
+        }
+    } catch (e) {
+        alert('Sorry, PDF download failed. Please take a screenshot of the certificate instead.');
+        console.error('Fallback failed:', e);
     }
 }
+
 // expose globals
 window.startApp = startApp;
 window.showProfileForm = showProfileForm;
@@ -306,41 +432,3 @@ window.retakeQuiz = retakeQuiz;
 window.closeValidationPopup = closeValidationPopup;
 window.closeAgePopup = closeAgePopup;
 window.closeMissingDetailsPopup = closeMissingDetailsPopup;
-
-// Handle Enter key on input fields
-document.addEventListener('DOMContentLoaded', function() {
-    const nameInput = document.getElementById('child-name-input');
-    const ageInput = document.getElementById('child-age-input');
-    
-    function handleInputKeyPress(e) {
-        if (e.key === 'Enter' || e.keyCode === 13) {
-            e.preventDefault(); // Prevent form submission
-            submitProfile(); // Call the submit function
-        }
-    }
-    
-    if (nameInput) {
-        nameInput.addEventListener('keypress', handleInputKeyPress);
-    }
-    
-    if (ageInput) {
-        ageInput.addEventListener('keypress', handleInputKeyPress);
-    }
-});
-function showLoadingIndicator() {
-    const loader = document.createElement('div');
-    loader.className = 'pdf-loading';
-    loader.id = 'pdf-loader';
-    loader.innerHTML = `
-        <div class="spinner"></div>
-        <p style="font-size: 1.2rem; color: #2d1b4e;">Generating your certificate...</p>
-    `;
-    document.body.appendChild(loader);
-}
-
-function hideLoadingIndicator() {
-    const loader = document.getElementById('pdf-loader');
-    if (loader) {
-        loader.remove();
-    }
-}

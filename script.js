@@ -39,15 +39,11 @@ const MAX_WRONG = 8;
 // ----- NEW FEATURE: Page Refresh Alert -----
 window.addEventListener('beforeunload', function (e) {
     // Only show alert if user is in the middle of a quiz or has started the app
-    const isInQuiz = !document.getElementById('start-screen').classList.contains('hidden') === false &&
-        !document.getElementById('home-screen').classList.contains('hidden') === false;
-
-    // Check if user has progressed beyond home screen
     const hasProgress = !document.getElementById('profile-form-screen').classList.contains('hidden') ||
-        !document.getElementById('quiz-screen').classList.contains('hidden') ||
-        !document.getElementById('results-screen').classList.contains('hidden') ||
-        !document.getElementById('certificate-screen').classList.contains('hidden');
-
+                        !document.getElementById('quiz-screen').classList.contains('hidden') ||
+                        !document.getElementById('results-screen').classList.contains('hidden') ||
+                        !document.getElementById('certificate-screen').classList.contains('hidden');
+    
     if (hasProgress) {
         // Show confirmation dialog
         e.preventDefault();
@@ -56,10 +52,10 @@ window.addEventListener('beforeunload', function (e) {
     }
 });
 
-// ----- NEW FEATURE: Home Button Without Refresh -----
+// ----- FIXED: Home Button Without Refresh (goes to subject selection) -----
 function goHome() {
     playSfx('click');
-
+    
     // Hide all screens
     document.getElementById('start-screen').classList.add('hidden');
     document.getElementById('home-screen').classList.remove('hidden');
@@ -67,21 +63,39 @@ function goHome() {
     document.getElementById('quiz-screen').classList.add('hidden');
     document.getElementById('results-screen').classList.add('hidden');
     document.getElementById('certificate-screen').classList.add('hidden');
-
-    // Reset state
+    
+    // Reset all popups
+    document.getElementById('retake-popup').classList.add('hidden');
+    document.getElementById('validation-popup').classList.add('hidden');
+    document.getElementById('age-validation-popup').classList.add('hidden');
+    document.getElementById('missing-details-popup').classList.add('hidden');
+    
+    // Reset state completely
     currentSubject = "";
     currentQuestionIndex = 0;
     userAnswers = [];
     wrongCount = 0;
+    finalScore = 0;
     childProfile = { name: "", age: "", avatar: "🧒" };
-
+    
     // Clear input fields
     document.getElementById('child-name-input').value = '';
     document.getElementById('child-age-input').value = '';
     document.getElementById('avatar-preview').innerText = '🧒';
-
+    
     // Reset avatar selections
     document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+    
+    // Reset header displays
+    document.getElementById('header-avatar').innerText = '🧒';
+    document.getElementById('header-name').innerText = 'Friend';
+    document.getElementById('header-age').innerText = '5 yrs';
+}
+
+// ----- FIXED: Play Again Function (goes to subject selection) -----
+function playAgain() {
+    playSfx('click');
+    goHome(); // Reuse the goHome function to return to subject selection
 }
 
 function startApp() {
@@ -123,7 +137,7 @@ function closeMissingDetailsPopup() {
 function retakeQuiz() {
     playSfx('click');
     hideRetakePopup();
-    // Reset state
+    // Reset state for retake
     currentQuestionIndex = 0;
     userAnswers = Array(15).fill(null);
     wrongCount = 0;
@@ -152,14 +166,14 @@ function submitProfile() {
     let age = document.getElementById('child-age-input').value.trim();
 
     if (!name || !age) {
-        showMissingDetailsPopup(); // Show popup instead of alert
+        showMissingDetailsPopup();
         return;
     }
 
     // Check if age is below 3
     if (parseInt(age) < 3) {
         showAgePopup();
-        return; // Don't proceed to quiz
+        return;
     }
 
     childProfile.name = name;
@@ -169,10 +183,10 @@ function submitProfile() {
     document.getElementById('header-age').innerText = childProfile.age + ' yrs';
     document.getElementById('profile-form-screen').classList.add('hidden');
     document.getElementById('quiz-screen').classList.remove('hidden');
-
+    
     // Set quiz title
     document.getElementById('quiz-title').innerText = currentSubject + ' Quiz';
-
+    
     startQuiz();
 }
 
@@ -249,14 +263,14 @@ function showResults() {
         if (isCorrect) score++;
         let itemClass = isCorrect ? 'correct' : 'wrong';
         reviewHtml += `
-                    <div class="review-item ${itemClass}">
-                        <div class="review-question">${i + 1}. ${q.q}</div>
-                        <div>
-                            <span class="review-answer user-answer">Your answer: ${userAns}</span>
-                            ${!isCorrect ? `<span class="review-answer correct-answer">Correct: ${q.correct}</span>` : ''}
-                        </div>
-                    </div>
-                `;
+            <div class="review-item ${itemClass}">
+                <div class="review-question">${i + 1}. ${q.q}</div>
+                <div>
+                    <span class="review-answer user-answer">Your answer: ${userAns}</span>
+                    ${!isCorrect ? `<span class="review-answer correct-answer">Correct: ${q.correct}</span>` : ''}
+                </div>
+            </div>
+        `;
     }
     finalScore = score;
     document.getElementById('score-summary').innerHTML = `<h3>Score: ${score} / 15</h3>`;
@@ -265,13 +279,17 @@ function showResults() {
     let actionsDiv = document.getElementById('results-actions');
     if (score >= 8 && wrongCount < MAX_WRONG) {
         playSfx('win');
-        actionsDiv.innerHTML = `<button class="action-btn" onclick="showCertDisplay()">Get Certificate! 🏆😊</button>
-                                        <button class="action-btn" style="background:#ff9248;" onclick="goHome()">Home 🏠</button>`;
+        actionsDiv.innerHTML = `
+            <button class="action-btn" onclick="showCertDisplay()">Get Certificate! 🏆😊</button>
+            <button class="action-btn" style="background:#ff9248;" onclick="playAgain()">Play Again 🔄</button>
+        `;
     } else {
         playSfx('error');
-        actionsDiv.innerHTML = `<p style="color:#c0392b; font-weight:bold;">You need 8 marks to pass. Try again! 😢</p>
-                                        <button class="action-btn" style="background:#e67e22;" onclick="retakeQuiz()">Retake Quiz 🔄</button>
-                                        <button class="action-btn" style="background:#ff9248; margin-top:5px;" onclick="goHome()">Home 🏠</button>`;
+        actionsDiv.innerHTML = `
+            <p style="color:#c0392b; font-weight:bold;">You need 8 marks to pass. Try again! 😢</p>
+            <button class="action-btn" style="background:#e67e22;" onclick="retakeQuiz()">Retake Quiz 🔄</button>
+            <button class="action-btn" style="background:#ff9248; margin-top:5px;" onclick="playAgain()">Home 🏠</button>
+        `;
     }
 }
 
@@ -281,9 +299,34 @@ function showCertDisplay() {
     document.getElementById('cert-name-display').innerText = childProfile.name;
     document.getElementById('cert-subject').innerText = currentSubject;
     document.getElementById('cert-score').innerText = finalScore + ' / 15';
+    
+    // Add screenshot option for mobile users
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        addScreenshotOption();
+    }
 }
 
-// ----- NEW FEATURE: Loading Indicator Functions -----
+// Add screenshot option for mobile
+function addScreenshotOption() {
+    // Check if button already exists
+    if (document.getElementById('screenshot-btn')) return;
+    
+    // Create a screenshot button next to download button
+    const screenshotBtn = document.createElement('button');
+    screenshotBtn.id = 'screenshot-btn';
+    screenshotBtn.className = 'action-btn';
+    screenshotBtn.style.background = '#3b82f6';
+    screenshotBtn.style.marginTop = '10px';
+    screenshotBtn.innerHTML = 'Take Screenshot 📸';
+    screenshotBtn.onclick = function() {
+        alert('📱 On most phones: Press Power + Volume Down buttons simultaneously to take a screenshot!');
+    };
+    
+    // Add to certificate screen
+    document.querySelector('#certificate-screen .button-group').appendChild(screenshotBtn);
+}
+
+// Loading indicator functions
 function showLoadingIndicator() {
     const loader = document.createElement('div');
     loader.className = 'pdf-loading';
@@ -291,7 +334,7 @@ function showLoadingIndicator() {
     loader.innerHTML = `
         <div class="spinner"></div>
         <p style="font-size: 1.2rem; color: #2d1b4e;">Generating your certificate...</p>
-        <p style="font-size: 1rem; color: #f97316; margin-top: 10px;">Please wait...⏱️</p>
+        <p style="font-size: 1rem; color: #f97316; margin-top: 10px;">Please wait 4 seconds ⏱️</p>
     `;
     document.body.appendChild(loader);
 }
@@ -303,133 +346,7 @@ function hideLoadingIndicator() {
     }
 }
 
-// ----- NEW FEATURE: Mobile PDF Download Confirmation -----
-function showDownloadConfirmation() {
-    // Check if mobile
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-    if (isMobile) {
-        // Create and show success popup
-        const successPopup = document.createElement('div');
-        successPopup.className = 'popup-overlay';
-        successPopup.id = 'download-success-popup';
-        successPopup.innerHTML = `
-            <div class="popup-box validation">
-                <span class="popup-balloon left">🎈</span>
-                <span class="popup-balloon right">🎈</span>
-                <span class="popup-emoji">✅</span>
-                <h3>Success!</h3>
-                <p>Your PDF certificate has been downloaded.</p>
-                <p style="font-size: 1rem; margin-top: -10px;">Check your downloads folder 📁</p>
-                <button onclick="this.closest('.popup-overlay').remove()">OK 👍</button>
-            </div>
-        `;
-        document.body.appendChild(successPopup);
-
-        // Auto-remove after 4 seconds
-        setTimeout(() => {
-            const popup = document.getElementById('download-success-popup');
-            if (popup) popup.remove();
-        }, 4000);
-    }
-}
-
-function downloadCertificate() {
-    playSfx('download');
-
-    // Show loading popup
-    showLoadingIndicator();
-
-    // Wait 4 seconds before downloading
-    setTimeout(function () {
-        const element = document.getElementById('certificate-download-area');
-
-        // Check if we're on a mobile device
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-        if (isMobile) {
-            // For mobile devices - OPTIMIZED FOR MOBILE VIEWING
-            html2pdf().from(element).set({
-                margin: 0.1, // Smaller margin for mobile
-                filename: `${childProfile.name}_Award.pdf`,
-                html2canvas: {
-                    scale: 2, // Keep scale for quality
-                    letterRendering: true,
-                    useCORS: true,
-                    logging: false,
-                    allowTaint: false,
-                    backgroundColor: '#ffffff',
-                    windowWidth: 800, // Force a minimum width for better rendering
-                    windowHeight: 600
-                },
-                jsPDF: {
-                    unit: 'in',
-                    format: [8.3, 5.8], // Custom size: 8.3 x 5.8 inches (A5 landscape)
-                    orientation: 'landscape',
-                    compress: true,
-                    precision: 16
-                }
-            }).toPdf().get('pdf').then(function (pdf) {
-                // Add metadata for better mobile viewing
-                pdf.setProperties({
-                    title: `${childProfile.name}'s Certificate`,
-                    subject: 'Quiz Certificate',
-                    author: 'Kids Learning Club',
-                    keywords: 'certificate, kids, quiz',
-                    creator: 'Kids Learning Club'
-                });
-
-                // Convert PDF to blob and create download link
-                const blob = pdf.output('blob');
-                const url = URL.createObjectURL(blob);
-
-                // Create a temporary link and trigger download
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `${childProfile.name}_Award.pdf`;
-                link.style.display = 'none';
-
-                // For iOS, we need to append to body
-                document.body.appendChild(link);
-                link.click();
-
-                // Clean up
-                setTimeout(function () {
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                }, 100);
-
-                // Hide loading indicator
-                hideLoadingIndicator();
-
-                // Show success confirmation for mobile with better instructions
-                showMobileDownloadConfirmation();
-            }).catch(function (error) {
-                console.error('PDF generation failed:', error);
-                hideLoadingIndicator();
-
-                // Show error popup
-                showMobileErrorPopup();
-            });
-        } else {
-            // For desktop, use A4 landscape (standard size)
-            html2pdf().from(element).set({
-                margin: 0.3,
-                filename: `${childProfile.name}_Award.pdf`,
-                html2canvas: { scale: 2, letterRendering: true, useCORS: true, logging: false },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
-            }).save().then(function () {
-                hideLoadingIndicator();
-            }).catch(function (error) {
-                console.error('PDF generation failed:', error);
-                hideLoadingIndicator();
-                alert('Sorry, PDF download failed. Please try again.');
-            });
-        }
-    }, 4000); // 4 second delay
-}
-
-// New function: Mobile-specific download confirmation with viewing instructions
+// Mobile download confirmation
 function showMobileDownloadConfirmation() {
     // Create and show success popup with viewing instructions
     const successPopup = document.createElement('div');
@@ -452,15 +369,14 @@ function showMobileDownloadConfirmation() {
         </div>
     `;
     document.body.appendChild(successPopup);
-
-    // Auto-remove after 8 seconds (longer to read instructions)
+    
+    // Auto-remove after 8 seconds
     setTimeout(() => {
         const popup = document.getElementById('download-success-popup');
         if (popup) popup.remove();
     }, 8000);
 }
 
-// New function: Mobile error popup
 function showMobileErrorPopup() {
     const errorPopup = document.createElement('div');
     errorPopup.className = 'popup-overlay';
@@ -476,10 +392,98 @@ function showMobileErrorPopup() {
         </div>
     `;
     document.body.appendChild(errorPopup);
-
+    
     setTimeout(() => {
         const popup = document.querySelector('.popup-overlay:last-child');
         if (popup) popup.remove();
+    }, 4000);
+}
+
+function downloadCertificate() {
+    playSfx('download');
+    
+    // Show loading popup
+    showLoadingIndicator();
+    
+    // Wait 4 seconds before downloading
+    setTimeout(function() {
+        const element = document.getElementById('certificate-download-area');
+        
+        // Check if we're on a mobile device
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+            // For mobile devices - OPTIMIZED FOR MOBILE VIEWING
+            html2pdf().from(element).set({
+                margin: 0.1,
+                filename: `${childProfile.name}_Award.pdf`,
+                html2canvas: { 
+                    scale: 2,
+                    letterRendering: true, 
+                    useCORS: true, 
+                    logging: false,
+                    allowTaint: false,
+                    backgroundColor: '#ffffff',
+                    windowWidth: 800,
+                    windowHeight: 600
+                },
+                jsPDF: { 
+                    unit: 'in', 
+                    format: [8.3, 5.8],
+                    orientation: 'landscape',
+                    compress: true,
+                    precision: 16
+                }
+            }).toPdf().get('pdf').then(function(pdf) {
+                // Add metadata for better mobile viewing
+                pdf.setProperties({
+                    title: `${childProfile.name}'s Certificate`,
+                    subject: 'Quiz Certificate',
+                    author: 'Kids Learning Club',
+                    keywords: 'certificate, kids, quiz',
+                    creator: 'Kids Learning Club'
+                });
+                
+                // Convert PDF to blob and create download link
+                const blob = pdf.output('blob');
+                const url = URL.createObjectURL(blob);
+                
+                // Create a temporary link and trigger download
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${childProfile.name}_Award.pdf`;
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                
+                setTimeout(function() {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                }, 100);
+                
+                hideLoadingIndicator();
+                showMobileDownloadConfirmation();
+            }).catch(function(error) {
+                console.error('PDF generation failed:', error);
+                hideLoadingIndicator();
+                showMobileErrorPopup();
+            });
+        } else {
+            // For desktop
+            html2pdf().from(element).set({
+                margin: 0.3,
+                filename: `${childProfile.name}_Award.pdf`,
+                html2canvas: { scale: 2, letterRendering: true, useCORS: true, logging: false },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+            }).save().then(function() {
+                hideLoadingIndicator();
+            }).catch(function(error) {
+                console.error('PDF generation failed:', error);
+                hideLoadingIndicator();
+                alert('Sorry, PDF download failed. Please try again.');
+            });
+        }
     }, 4000);
 }
 
@@ -493,48 +497,43 @@ window.nextQuestion = nextQuestion;
 window.showCertDisplay = showCertDisplay;
 window.downloadCertificate = downloadCertificate;
 window.retakeQuiz = retakeQuiz;
+window.playAgain = playAgain;
 window.closeValidationPopup = closeValidationPopup;
 window.closeAgePopup = closeAgePopup;
 window.closeMissingDetailsPopup = closeMissingDetailsPopup;
 window.goHome = goHome;
 
-// ----- NEW FEATURE: Enhanced Enter Key Handler -----
-document.addEventListener('DOMContentLoaded', function () {
+// Enhanced Enter Key Handler
+document.addEventListener('DOMContentLoaded', function() {
     const nameInput = document.getElementById('child-name-input');
     const ageInput = document.getElementById('child-age-input');
-
+    
     function handleInputKeyPress(e) {
         if (e.key === 'Enter' || e.keyCode === 13) {
             e.preventDefault();
-
-            // Check which screen is active
+            
             if (!document.getElementById('profile-form-screen').classList.contains('hidden')) {
-                // On profile screen
                 submitProfile();
             } else if (!document.getElementById('quiz-screen').classList.contains('hidden')) {
-                // On quiz screen
                 nextQuestion();
             }
         }
     }
-
+    
     if (nameInput) {
         nameInput.addEventListener('keypress', handleInputKeyPress);
     }
-
+    
     if (ageInput) {
         ageInput.addEventListener('keypress', handleInputKeyPress);
     }
-
-    // Add Enter key handler for the whole document to catch any missed cases
-    document.addEventListener('keypress', function (e) {
+    
+    document.addEventListener('keypress', function(e) {
         if (e.key === 'Enter' || e.keyCode === 13) {
-            // Don't interfere with textarea or other inputs that need Enter
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
                 return;
             }
-
-            // If on quiz screen and no input is focused, trigger next question
+            
             if (!document.getElementById('quiz-screen').classList.contains('hidden')) {
                 e.preventDefault();
                 nextQuestion();

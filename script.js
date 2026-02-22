@@ -36,27 +36,41 @@ let finalScore = 0;
 let wrongCount = 0;
 const MAX_WRONG = 8;
 
-// ----- NEW FEATURE: Page Refresh Alert -----
-window.addEventListener('beforeunload', function (e) {
-    // Only show alert if user is in the middle of a quiz or has started the app
+// ----- Page Refresh Alert (fixed) -----
+let isNavigatingInternally = false;
+let navigationTimestamp = 0;
+
+window.removeEventListener('beforeunload', handleBeforeUnload);
+window.addEventListener('beforeunload', handleBeforeUnload);
+
+function handleBeforeUnload(e) {
+    const now = Date.now();
+    if (isNavigatingInternally || (now - navigationTimestamp < 500)) {
+        isNavigatingInternally = false;
+        return;
+    }
+    
     const hasProgress = !document.getElementById('profile-form-screen').classList.contains('hidden') ||
                         !document.getElementById('quiz-screen').classList.contains('hidden') ||
                         !document.getElementById('results-screen').classList.contains('hidden') ||
                         !document.getElementById('certificate-screen').classList.contains('hidden');
     
-    if (hasProgress) {
-        // Show confirmation dialog
+    const hasAnswers = userAnswers && userAnswers.length > 0 && userAnswers.some(ans => ans !== null);
+    
+    if (hasProgress || hasAnswers || currentSubject !== "") {
         e.preventDefault();
         e.returnValue = 'Are you sure you want to refresh? Your progress may be lost.';
         return 'Are you sure you want to refresh? Your progress may be lost.';
     }
-});
+}
 
-// ----- FIXED: Home Button Without Refresh (goes to subject selection) -----
+// ----- Home Button Without Refresh -----
 function goHome() {
+    isNavigatingInternally = true;
+    navigationTimestamp = Date.now();
+    
     playSfx('click');
     
-    // Hide all screens
     document.getElementById('start-screen').classList.add('hidden');
     document.getElementById('home-screen').classList.remove('hidden');
     document.getElementById('profile-form-screen').classList.add('hidden');
@@ -64,13 +78,11 @@ function goHome() {
     document.getElementById('results-screen').classList.add('hidden');
     document.getElementById('certificate-screen').classList.add('hidden');
     
-    // Reset all popups
     document.getElementById('retake-popup').classList.add('hidden');
     document.getElementById('validation-popup').classList.add('hidden');
     document.getElementById('age-validation-popup').classList.add('hidden');
     document.getElementById('missing-details-popup').classList.add('hidden');
     
-    // Reset state completely
     currentSubject = "";
     currentQuestionIndex = 0;
     userAnswers = [];
@@ -78,24 +90,24 @@ function goHome() {
     finalScore = 0;
     childProfile = { name: "", age: "", avatar: "🧒" };
     
-    // Clear input fields
     document.getElementById('child-name-input').value = '';
     document.getElementById('child-age-input').value = '';
     document.getElementById('avatar-preview').innerText = '🧒';
     
-    // Reset avatar selections
     document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
     
-    // Reset header displays
     document.getElementById('header-avatar').innerText = '🧒';
     document.getElementById('header-name').innerText = 'Friend';
     document.getElementById('header-age').innerText = '5 yrs';
+    
+    setTimeout(() => {
+        isNavigatingInternally = false;
+    }, 1000);
 }
 
-// ----- FIXED: Play Again Function (goes to subject selection) -----
 function playAgain() {
     playSfx('click');
-    goHome(); // Reuse the goHome function to return to subject selection
+    goHome();
 }
 
 function startApp() {
@@ -137,7 +149,6 @@ function closeMissingDetailsPopup() {
 function retakeQuiz() {
     playSfx('click');
     hideRetakePopup();
-    // Reset state for retake
     currentQuestionIndex = 0;
     userAnswers = Array(15).fill(null);
     wrongCount = 0;
@@ -170,7 +181,6 @@ function submitProfile() {
         return;
     }
 
-    // Check if age is below 3
     if (parseInt(age) < 3) {
         showAgePopup();
         return;
@@ -184,7 +194,6 @@ function submitProfile() {
     document.getElementById('profile-form-screen').classList.add('hidden');
     document.getElementById('quiz-screen').classList.remove('hidden');
     
-    // Set quiz title
     document.getElementById('quiz-title').innerText = currentSubject + ' Quiz';
     
     startQuiz();
@@ -300,7 +309,6 @@ function showCertDisplay() {
     document.getElementById('cert-subject').innerText = currentSubject;
     document.getElementById('cert-score').innerText = finalScore + ' / 15';
     
-    // Add screenshot option for mobile users
     if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         addScreenshotOption();
     }
@@ -308,22 +316,138 @@ function showCertDisplay() {
 
 // Add screenshot option for mobile
 function addScreenshotOption() {
-    // Check if button already exists
     if (document.getElementById('screenshot-btn')) return;
     
-    // Create a screenshot button next to download button
     const screenshotBtn = document.createElement('button');
     screenshotBtn.id = 'screenshot-btn';
     screenshotBtn.className = 'action-btn';
     screenshotBtn.style.background = '#3b82f6';
     screenshotBtn.style.marginTop = '10px';
     screenshotBtn.innerHTML = 'Take Screenshot 📸';
-    screenshotBtn.onclick = function() {
-        alert('📱 On most phones: Press Power + Volume Down buttons simultaneously to take a screenshot!');
-    };
+    screenshotBtn.onclick = takeScreenshot;
     
-    // Add to certificate screen
     document.querySelector('#certificate-screen .button-group').appendChild(screenshotBtn);
+}
+
+// Automatic screenshot function
+function takeScreenshot() {
+    playSfx('click');
+    showScreenshotLoading();
+    
+    const element = document.getElementById('certificate-download-area');
+    
+    html2canvas(element, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        allowTaint: false,
+        useCORS: true,
+        logging: false
+    }).then(canvas => {
+        hideScreenshotLoading();
+        
+        const imageData = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = `${childProfile.name}_Certificate.png`;
+        link.href = imageData;
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        
+        setTimeout(() => {
+            document.body.removeChild(link);
+        }, 100);
+        
+        showScreenshotSuccess();
+    }).catch(error => {
+        console.error('Screenshot failed:', error);
+        hideScreenshotLoading();
+        showManualScreenshotInstructions();
+    });
+}
+
+// Manual screenshot instructions
+function showManualScreenshotInstructions() {
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    
+    let instructions = '';
+    if (isIOS) {
+        instructions = '📱 iPhone: Press Side + Volume Up buttons simultaneously';
+    } else if (isAndroid) {
+        instructions = '📱 Android: Press Power + Volume Down buttons simultaneously';
+    } else {
+        instructions = '📱 Press Print Screen (PrtScn) button on your keyboard';
+    }
+    
+    const instructionPopup = document.createElement('div');
+    instructionPopup.className = 'popup-overlay';
+    instructionPopup.innerHTML = `
+        <div class="popup-box validation" style="max-width: 450px;">
+            <span class="popup-balloon left">🎈</span>
+            <span class="popup-balloon right">🎈</span>
+            <span class="popup-emoji">📸</span>
+            <h3>Take a Screenshot</h3>
+            <p style="font-size: 1.2rem;">${instructions}</p>
+            <div style="background: #fff3cd; border-radius: 30px; padding: 15px; margin: 15px 0;">
+                <p style="font-size: 1rem; margin: 5px 0;">✨ Then find it in your Photos/Gallery app</p>
+            </div>
+            <button onclick="this.closest('.popup-overlay').remove()" style="font-size: 1.5rem;">Got it! 👍</button>
+        </div>
+    `;
+    document.body.appendChild(instructionPopup);
+    
+    setTimeout(() => {
+        const popup = document.querySelector('.popup-overlay:last-child');
+        if (popup) popup.remove();
+    }, 6000);
+}
+
+// Screenshot loading indicator
+function showScreenshotLoading() {
+    const loader = document.createElement('div');
+    loader.className = 'pdf-loading';
+    loader.id = 'screenshot-loader';
+    loader.innerHTML = `
+        <div class="spinner"></div>
+        <p style="font-size: 1.2rem; color: #2d1b4e;">Taking screenshot...</p>
+        <p style="font-size: 1rem; color: #3b82f6; margin-top: 10px;">📸 Capturing your certificate</p>
+    `;
+    document.body.appendChild(loader);
+}
+
+function hideScreenshotLoading() {
+    const loader = document.getElementById('screenshot-loader');
+    if (loader) {
+        loader.remove();
+    }
+}
+
+// Screenshot success message
+function showScreenshotSuccess() {
+    const successPopup = document.createElement('div');
+    successPopup.className = 'popup-overlay';
+    successPopup.id = 'screenshot-success-popup';
+    successPopup.innerHTML = `
+        <div class="popup-box validation" style="max-width: 450px;">
+            <span class="popup-balloon left">🎈</span>
+            <span class="popup-balloon right">🎈</span>
+            <span class="popup-emoji">✅</span>
+            <h3>Screenshot Saved!</h3>
+            <p style="font-size: 1.3rem;">Your certificate screenshot has been saved!</p>
+            <div style="background: #e6f7ff; border-radius: 40px; padding: 15px; margin: 15px 0;">
+                <p style="font-size: 1rem; margin: 5px 0;">📁 Check your Downloads folder</p>
+                <p style="font-size: 0.9rem; margin: 5px 0;">Filename: ${childProfile.name}_Certificate.png</p>
+            </div>
+            <button onclick="this.closest('.popup-overlay').remove()" style="font-size: 1.5rem;">Awesome! 👍</button>
+        </div>
+    `;
+    document.body.appendChild(successPopup);
+    
+    setTimeout(() => {
+        const popup = document.getElementById('screenshot-success-popup');
+        if (popup) popup.remove();
+    }, 5000);
 }
 
 // Loading indicator functions
@@ -348,7 +472,6 @@ function hideLoadingIndicator() {
 
 // Mobile download confirmation
 function showMobileDownloadConfirmation() {
-    // Create and show success popup with viewing instructions
     const successPopup = document.createElement('div');
     successPopup.className = 'popup-overlay';
     successPopup.id = 'download-success-popup';
@@ -370,7 +493,6 @@ function showMobileDownloadConfirmation() {
     `;
     document.body.appendChild(successPopup);
     
-    // Auto-remove after 8 seconds
     setTimeout(() => {
         const popup = document.getElementById('download-success-popup');
         if (popup) popup.remove();
@@ -399,6 +521,7 @@ function showMobileErrorPopup() {
     }, 4000);
 }
 
+// ----- FIXED: Mobile PDF Download with Proper Sizing -----
 function downloadCertificate() {
     playSfx('download');
     
@@ -414,26 +537,42 @@ function downloadCertificate() {
         
         if (isMobile) {
             // For mobile devices - OPTIMIZED FOR MOBILE VIEWING
+            // Get the actual dimensions of the certificate element
+            const certificateWidth = element.offsetWidth;
+            const certificateHeight = element.offsetHeight;
+            
+            // Calculate aspect ratio
+            const aspectRatio = certificateWidth / certificateHeight;
+            
+            // Set PDF dimensions to match certificate aspect ratio
+            // Use a standard width for mobile PDFs (6 inches is good for mobile screens)
+            const pdfWidth = 6; // inches
+            const pdfHeight = pdfWidth / aspectRatio;
+            
             html2pdf().from(element).set({
-                margin: 0.1,
-                filename: `${childProfile.name}_Award.pdf`,
+                margin: 0, // No margins to use full space
+                filename: `${childProfile.name}_Certificate.pdf`,
+                pagebreak: { mode: 'avoid-all' }, // Prevent page breaks
                 html2canvas: { 
-                    scale: 2,
+                    scale: 2, // Higher scale for better quality
                     letterRendering: true, 
                     useCORS: true, 
                     logging: false,
                     allowTaint: false,
                     backgroundColor: '#ffffff',
-                    windowWidth: 800,
-                    windowHeight: 600
+                    windowWidth: certificateWidth,
+                    windowHeight: certificateHeight,
+                    scrollX: 0,
+                    scrollY: 0
                 },
                 jsPDF: { 
                     unit: 'in', 
-                    format: [8.3, 5.8],
-                    orientation: 'landscape',
+                    format: [pdfWidth, pdfHeight],
+                    orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
                     compress: true,
                     precision: 16
-                }
+                },
+                image: { type: 'jpeg', quality: 0.98 } // Better image quality
             }).toPdf().get('pdf').then(function(pdf) {
                 // Add metadata for better mobile viewing
                 pdf.setProperties({
@@ -451,7 +590,7 @@ function downloadCertificate() {
                 // Create a temporary link and trigger download
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `${childProfile.name}_Award.pdf`;
+                link.download = `${childProfile.name}_Certificate.pdf`;
                 link.style.display = 'none';
                 
                 document.body.appendChild(link);
@@ -470,12 +609,23 @@ function downloadCertificate() {
                 showMobileErrorPopup();
             });
         } else {
-            // For desktop
+            // For desktop - use standard A4 landscape
             html2pdf().from(element).set({
                 margin: 0.3,
-                filename: `${childProfile.name}_Award.pdf`,
-                html2canvas: { scale: 2, letterRendering: true, useCORS: true, logging: false },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+                filename: `${childProfile.name}_Certificate.pdf`,
+                html2canvas: { 
+                    scale: 2, 
+                    letterRendering: true, 
+                    useCORS: true, 
+                    logging: false,
+                    backgroundColor: '#ffffff'
+                },
+                jsPDF: { 
+                    unit: 'in', 
+                    format: 'a4', 
+                    orientation: 'landscape'
+                },
+                image: { type: 'jpeg', quality: 0.95 }
             }).save().then(function() {
                 hideLoadingIndicator();
             }).catch(function(error) {
@@ -484,7 +634,7 @@ function downloadCertificate() {
                 alert('Sorry, PDF download failed. Please try again.');
             });
         }
-    }, 4000);
+    }, 4000); // 4 second delay
 }
 
 // expose globals

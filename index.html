@@ -3,14 +3,15 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Kids Learning Club – Balloon Bonanza (with Answer Review)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Learning Club</title>
     <!-- fonts & pdf library -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;800&display=swap"
         rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link rel="stylesheet" href="style.css">
 </head>
+<link rel="stylesheet" href="style.css">
+
 <body>
     <!-- balloon background -->
     <div class="balloon-bg">
@@ -50,7 +51,9 @@
 
         <!-- profile screen -->
         <div id="profile-form-screen" class="screen hidden">
-            <div class="header-nav"><button class="restart-small-btn" onclick="location.reload()">⬅ Back</button></div>
+            <div class="header-nav">
+                <button class="restart-small-btn" onclick="goHome()">⬅ Back</button>
+            </div>
             <h2>✨ Let's Get to Know You! ✨</h2>
             <div class="avatar-preview">
                 <div class="avatar-circle" id="avatar-preview">🧒</div>
@@ -74,10 +77,12 @@
         <!-- quiz screen -->
         <div id="quiz-screen" class="screen hidden">
             <div class="quiz-header">
-                <button class="restart-small-btn" onclick="location.reload()">🏠 Home</button>
-                <div class="profile-badge"><span class="profile-icon" id="header-avatar">🧒</span><span
-                        class="profile-name" id="header-name">Friend</span><span class="profile-age" id="header-age">5
-                        yrs</span></div>
+                <button class="restart-small-btn" onclick="goHome()">🏠 Home</button>
+                <div class="profile-badge">
+                    <span class="profile-icon" id="header-avatar">🧒</span>
+                    <span class="profile-name" id="header-name">Friend</span>
+                    <span class="profile-age" id="header-age">5 yrs</span>
+                </div>
             </div>
             <h2 id="quiz-title">Subject</h2>
             <div id="question-container">
@@ -119,8 +124,7 @@
             <div class="button-group" style="margin-top:20px;">
                 <button class="action-btn" style="background:#0d9488;" onclick="downloadCertificate()">Download PDF
                     📥</button>
-                <button class="action-btn" style="background:#f97316;" onclick="location.reload()">Play Again!
-                    🏠</button>
+                <button class="action-btn" style="background:#f97316;" onclick="goHome()">Play Again! 🏠</button>
             </div>
         </div>
 
@@ -178,5 +182,3 @@
 </body>
 
 </html>
-
-

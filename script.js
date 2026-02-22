@@ -230,24 +230,62 @@ function startQuiz() {
 }
 
 function showQuestion() {
+    // Make sure we have a valid subject and question
+    if (!currentSubject || !questionsData[currentSubject]) {
+        console.error('No subject selected');
+        goToHome();
+        return;
+    }
+    
     let qData = questionsData[currentSubject][currentQuestionIndex];
+    if (!qData) {
+        console.error('Question not found');
+        return;
+    }
+    
+    // Update the quiz title with subject name
+    document.getElementById('quiz-title').innerText = currentSubject + ' Quiz';
+    
+    // Update question count
     document.getElementById('question-count').innerText = `Question ${currentQuestionIndex + 1} of 15`;
+    
+    // Update question text
     document.getElementById('question-text').innerText = qData.q;
-    document.getElementById('question-image').src = qData.img || 'demo.jpeg';
+    
+    // Update question image
+    const questionImage = document.getElementById('question-image');
+    if (qData.img) {
+        questionImage.src = qData.img;
+    } else {
+        questionImage.src = 'demo.jpeg';
+    }
+    
+    // Show/hide previous button
     document.getElementById('prev-btn').style.visibility = currentQuestionIndex === 0 ? "hidden" : "visible";
+    
+    // Clear and rebuild answer buttons
     let container = document.getElementById('answer-buttons'); 
     container.innerHTML = '';
+    
+    // Create answer buttons
     qData.a.forEach(ans => {
         let btn = document.createElement('button');
         btn.innerText = ans; 
         btn.classList.add('answer-btn');
-        if (userAnswers[currentQuestionIndex] === ans) btn.classList.add('selected');
+        
+        // Mark as selected if this was previously selected
+        if (userAnswers[currentQuestionIndex] === ans) {
+            btn.classList.add('selected');
+        }
+        
+        // Add click handler
         btn.onclick = () => {
             playSfx('click');
             userAnswers[currentQuestionIndex] = ans;
             document.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
         };
+        
         container.appendChild(btn);
     });
 }
@@ -494,3 +532,4 @@ window.retakeQuiz = retakeQuiz;
 window.closeValidationPopup = closeValidationPopup;
 window.closeAgePopup = closeAgePopup;
 window.closeMissingDetailsPopup = closeMissingDetailsPopup;
+

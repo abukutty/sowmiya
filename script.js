@@ -49,14 +49,14 @@ function handleBeforeUnload(e) {
         isNavigatingInternally = false;
         return;
     }
-    
+
     const hasProgress = !document.getElementById('profile-form-screen').classList.contains('hidden') ||
-                        !document.getElementById('quiz-screen').classList.contains('hidden') ||
-                        !document.getElementById('results-screen').classList.contains('hidden') ||
-                        !document.getElementById('certificate-screen').classList.contains('hidden');
-    
+        !document.getElementById('quiz-screen').classList.contains('hidden') ||
+        !document.getElementById('results-screen').classList.contains('hidden') ||
+        !document.getElementById('certificate-screen').classList.contains('hidden');
+
     const hasAnswers = userAnswers && userAnswers.length > 0 && userAnswers.some(ans => ans !== null);
-    
+
     if (hasProgress || hasAnswers || currentSubject !== "") {
         e.preventDefault();
         e.returnValue = 'Are you sure you want to refresh? Your progress may be lost.';
@@ -68,38 +68,38 @@ function handleBeforeUnload(e) {
 function goHome() {
     isNavigatingInternally = true;
     navigationTimestamp = Date.now();
-    
+
     playSfx('click');
-    
+
     document.getElementById('start-screen').classList.add('hidden');
     document.getElementById('home-screen').classList.remove('hidden');
     document.getElementById('profile-form-screen').classList.add('hidden');
     document.getElementById('quiz-screen').classList.add('hidden');
     document.getElementById('results-screen').classList.add('hidden');
     document.getElementById('certificate-screen').classList.add('hidden');
-    
+
     document.getElementById('retake-popup').classList.add('hidden');
     document.getElementById('validation-popup').classList.add('hidden');
     document.getElementById('age-validation-popup').classList.add('hidden');
     document.getElementById('missing-details-popup').classList.add('hidden');
-    
+
     currentSubject = "";
     currentQuestionIndex = 0;
     userAnswers = [];
     wrongCount = 0;
     finalScore = 0;
     childProfile = { name: "", age: "", avatar: "🧒" };
-    
+
     document.getElementById('child-name-input').value = '';
     document.getElementById('child-age-input').value = '';
     document.getElementById('avatar-preview').innerText = '🧒';
-    
+
     document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
-    
+
     document.getElementById('header-avatar').innerText = '🧒';
     document.getElementById('header-name').innerText = 'Friend';
     document.getElementById('header-age').innerText = '5 yrs';
-    
+
     setTimeout(() => {
         isNavigatingInternally = false;
     }, 1000);
@@ -193,9 +193,9 @@ function submitProfile() {
     document.getElementById('header-age').innerText = childProfile.age + ' yrs';
     document.getElementById('profile-form-screen').classList.add('hidden');
     document.getElementById('quiz-screen').classList.remove('hidden');
-    
+
     document.getElementById('quiz-title').innerText = currentSubject + ' Quiz';
-    
+
     startQuiz();
 }
 
@@ -206,22 +206,59 @@ function startQuiz() {
     showQuestion();
 }
 
+// UPDATED showQuestion function with green/red feedback
 function showQuestion() {
     let qData = questionsData[currentSubject][currentQuestionIndex];
     document.getElementById('question-count').innerText = `Question ${currentQuestionIndex + 1} of 15`;
     document.getElementById('question-text').innerText = qData.q;
     document.getElementById('question-image').src = qData.img || 'demo.jpeg';
     document.getElementById('prev-btn').style.visibility = currentQuestionIndex === 0 ? "hidden" : "visible";
-    let container = document.getElementById('answer-buttons'); container.innerHTML = '';
+    let container = document.getElementById('answer-buttons');
+    container.innerHTML = '';
+
     qData.a.forEach(ans => {
         let btn = document.createElement('button');
-        btn.innerText = ans; btn.classList.add('answer-btn');
-        if (userAnswers[currentQuestionIndex] === ans) btn.classList.add('selected');
+        btn.innerText = ans;
+        btn.classList.add('answer-btn');
+
+        // If this question was already answered, show the result
+        if (userAnswers[currentQuestionIndex] !== null && userAnswers[currentQuestionIndex] !== undefined) {
+            if (ans === qData.correct) {
+                btn.classList.add('correct-answer');
+            } else if (ans === userAnswers[currentQuestionIndex] && ans !== qData.correct) {
+                btn.classList.add('wrong-answer');
+            }
+        }
+
+        // If this is the currently selected answer (when navigating back)
+        if (userAnswers[currentQuestionIndex] === ans) {
+            btn.classList.add('selected');
+        }
+
         btn.onclick = () => {
             playSfx('click');
+
+            // Store the answer
             userAnswers[currentQuestionIndex] = ans;
-            document.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
+
+            // Remove all special classes from all buttons
+            document.querySelectorAll('.answer-btn').forEach(b => {
+                b.classList.remove('selected', 'correct-answer', 'wrong-answer');
+            });
+
+            // Add classes to show correct/wrong immediately
+            if (ans === qData.correct) {
+                btn.classList.add('correct-answer'); // Green for correct
+            } else {
+                btn.classList.add('wrong-answer'); // Red for wrong
+            }
+
+            // Also highlight the correct answer for learning
+            document.querySelectorAll('.answer-btn').forEach(b => {
+                if (b.innerText === qData.correct) {
+                    b.classList.add('correct-answer');
+                }
+            });
         };
         container.appendChild(btn);
     });
@@ -308,7 +345,7 @@ function showCertDisplay() {
     document.getElementById('cert-name-display').innerText = childProfile.name;
     document.getElementById('cert-subject').innerText = currentSubject;
     document.getElementById('cert-score').innerText = finalScore + ' / 15';
-    
+
     if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         addScreenshotOption();
     }
@@ -317,7 +354,7 @@ function showCertDisplay() {
 // Add screenshot option for mobile
 function addScreenshotOption() {
     if (document.getElementById('screenshot-btn')) return;
-    
+
     const screenshotBtn = document.createElement('button');
     screenshotBtn.id = 'screenshot-btn';
     screenshotBtn.className = 'action-btn';
@@ -325,7 +362,7 @@ function addScreenshotOption() {
     screenshotBtn.style.marginTop = '10px';
     screenshotBtn.innerHTML = 'Take Screenshot 📸';
     screenshotBtn.onclick = takeScreenshot;
-    
+
     document.querySelector('#certificate-screen .button-group').appendChild(screenshotBtn);
 }
 
@@ -333,9 +370,9 @@ function addScreenshotOption() {
 function takeScreenshot() {
     playSfx('click');
     showScreenshotLoading();
-    
+
     const element = document.getElementById('certificate-download-area');
-    
+
     html2canvas(element, {
         scale: 2,
         backgroundColor: '#ffffff',
@@ -344,20 +381,20 @@ function takeScreenshot() {
         logging: false
     }).then(canvas => {
         hideScreenshotLoading();
-        
+
         const imageData = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.download = `${childProfile.name}_Certificate.png`;
         link.href = imageData;
         link.style.display = 'none';
-        
+
         document.body.appendChild(link);
         link.click();
-        
+
         setTimeout(() => {
             document.body.removeChild(link);
         }, 100);
-        
+
         showScreenshotSuccess();
     }).catch(error => {
         console.error('Screenshot failed:', error);
@@ -370,7 +407,7 @@ function takeScreenshot() {
 function showManualScreenshotInstructions() {
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
     const isAndroid = /Android/i.test(navigator.userAgent);
-    
+
     let instructions = '';
     if (isIOS) {
         instructions = '📱 iPhone: Press Side + Volume Up buttons simultaneously';
@@ -379,7 +416,7 @@ function showManualScreenshotInstructions() {
     } else {
         instructions = '📱 Press Print Screen (PrtScn) button on your keyboard';
     }
-    
+
     const instructionPopup = document.createElement('div');
     instructionPopup.className = 'popup-overlay';
     instructionPopup.innerHTML = `
@@ -396,11 +433,11 @@ function showManualScreenshotInstructions() {
         </div>
     `;
     document.body.appendChild(instructionPopup);
-    
+
     setTimeout(() => {
         const popup = document.querySelector('.popup-overlay:last-child');
         if (popup) popup.remove();
-    }, 9000);
+    }, 6000);
 }
 
 // Screenshot loading indicator
@@ -443,11 +480,11 @@ function showScreenshotSuccess() {
         </div>
     `;
     document.body.appendChild(successPopup);
-    
+
     setTimeout(() => {
         const popup = document.getElementById('screenshot-success-popup');
         if (popup) popup.remove();
-    }, 9000);
+    }, 5000);
 }
 
 // Loading indicator functions
@@ -492,11 +529,11 @@ function showMobileDownloadConfirmation() {
         </div>
     `;
     document.body.appendChild(successPopup);
-    
+
     setTimeout(() => {
         const popup = document.getElementById('download-success-popup');
         if (popup) popup.remove();
-    }, 9000);
+    }, 8000);
 }
 
 function showMobileErrorPopup() {
@@ -514,49 +551,49 @@ function showMobileErrorPopup() {
         </div>
     `;
     document.body.appendChild(errorPopup);
-    
+
     setTimeout(() => {
         const popup = document.querySelector('.popup-overlay:last-child');
         if (popup) popup.remove();
-    }, 9000);
+    }, 4000);
 }
 
 // ----- FIXED: Mobile PDF Download with Proper Sizing -----
 function downloadCertificate() {
     playSfx('download');
-    
+
     // Show loading popup
     showLoadingIndicator();
-    
+
     // Wait 4 seconds before downloading
-    setTimeout(function() {
+    setTimeout(function () {
         const element = document.getElementById('certificate-download-area');
-        
+
         // Check if we're on a mobile device
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        
+
         if (isMobile) {
             // For mobile devices - OPTIMIZED FOR MOBILE VIEWING
             // Get the actual dimensions of the certificate element
             const certificateWidth = element.offsetWidth;
             const certificateHeight = element.offsetHeight;
-            
+
             // Calculate aspect ratio
             const aspectRatio = certificateWidth / certificateHeight;
-            
+
             // Set PDF dimensions to match certificate aspect ratio
             // Use a standard width for mobile PDFs (6 inches is good for mobile screens)
             const pdfWidth = 6; // inches
             const pdfHeight = pdfWidth / aspectRatio;
-            
+
             html2pdf().from(element).set({
                 margin: 0, // No margins to use full space
                 filename: `${childProfile.name}_Certificate.pdf`,
                 pagebreak: { mode: 'avoid-all' }, // Prevent page breaks
-                html2canvas: { 
+                html2canvas: {
                     scale: 2, // Higher scale for better quality
-                    letterRendering: true, 
-                    useCORS: true, 
+                    letterRendering: true,
+                    useCORS: true,
                     logging: false,
                     allowTaint: false,
                     backgroundColor: '#ffffff',
@@ -565,15 +602,15 @@ function downloadCertificate() {
                     scrollX: 0,
                     scrollY: 0
                 },
-                jsPDF: { 
-                    unit: 'in', 
+                jsPDF: {
+                    unit: 'in',
                     format: [pdfWidth, pdfHeight],
                     orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
                     compress: true,
                     precision: 16
                 },
                 image: { type: 'jpeg', quality: 0.98 } // Better image quality
-            }).toPdf().get('pdf').then(function(pdf) {
+            }).toPdf().get('pdf').then(function (pdf) {
                 // Add metadata for better mobile viewing
                 pdf.setProperties({
                     title: `${childProfile.name}'s Certificate`,
@@ -582,28 +619,28 @@ function downloadCertificate() {
                     keywords: 'certificate, kids, quiz',
                     creator: 'Kids Learning Club'
                 });
-                
+
                 // Convert PDF to blob and create download link
                 const blob = pdf.output('blob');
                 const url = URL.createObjectURL(blob);
-                
+
                 // Create a temporary link and trigger download
                 const link = document.createElement('a');
                 link.href = url;
                 link.download = `${childProfile.name}_Certificate.pdf`;
                 link.style.display = 'none';
-                
+
                 document.body.appendChild(link);
                 link.click();
-                
-                setTimeout(function() {
+
+                setTimeout(function () {
                     document.body.removeChild(link);
                     URL.revokeObjectURL(url);
                 }, 100);
-                
+
                 hideLoadingIndicator();
                 showMobileDownloadConfirmation();
-            }).catch(function(error) {
+            }).catch(function (error) {
                 console.error('PDF generation failed:', error);
                 hideLoadingIndicator();
                 showMobileErrorPopup();
@@ -613,22 +650,22 @@ function downloadCertificate() {
             html2pdf().from(element).set({
                 margin: 0.3,
                 filename: `${childProfile.name}_Certificate.pdf`,
-                html2canvas: { 
-                    scale: 2, 
-                    letterRendering: true, 
-                    useCORS: true, 
+                html2canvas: {
+                    scale: 2,
+                    letterRendering: true,
+                    useCORS: true,
                     logging: false,
                     backgroundColor: '#ffffff'
                 },
-                jsPDF: { 
-                    unit: 'in', 
-                    format: 'a4', 
+                jsPDF: {
+                    unit: 'in',
+                    format: 'a4',
                     orientation: 'landscape'
                 },
                 image: { type: 'jpeg', quality: 0.95 }
-            }).save().then(function() {
+            }).save().then(function () {
                 hideLoadingIndicator();
-            }).catch(function(error) {
+            }).catch(function (error) {
                 console.error('PDF generation failed:', error);
                 hideLoadingIndicator();
                 alert('Sorry, PDF download failed. Please try again.');
@@ -654,14 +691,14 @@ window.closeMissingDetailsPopup = closeMissingDetailsPopup;
 window.goHome = goHome;
 
 // Enhanced Enter Key Handler
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const nameInput = document.getElementById('child-name-input');
     const ageInput = document.getElementById('child-age-input');
-    
+
     function handleInputKeyPress(e) {
         if (e.key === 'Enter' || e.keyCode === 13) {
             e.preventDefault();
-            
+
             if (!document.getElementById('profile-form-screen').classList.contains('hidden')) {
                 submitProfile();
             } else if (!document.getElementById('quiz-screen').classList.contains('hidden')) {
@@ -669,21 +706,21 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
+
     if (nameInput) {
         nameInput.addEventListener('keypress', handleInputKeyPress);
     }
-    
+
     if (ageInput) {
         ageInput.addEventListener('keypress', handleInputKeyPress);
     }
-    
-    document.addEventListener('keypress', function(e) {
+
+    document.addEventListener('keypress', function (e) {
         if (e.key === 'Enter' || e.keyCode === 13) {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
                 return;
             }
-            
+
             if (!document.getElementById('quiz-screen').classList.contains('hidden')) {
                 e.preventDefault();
                 nextQuestion();
@@ -691,6 +728,3 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
-
-

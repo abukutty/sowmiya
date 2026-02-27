@@ -219,7 +219,7 @@ function showQuestion() {
     qData.a.forEach(ans => {
         let btn = document.createElement('button');
         btn.innerText = ans;
-        btn.classList.add('answer-btn');
+        btn.className = 'answer-btn'; // Use className instead of classList.add for better mobile support
 
         // If this question was already answered, show the result
         if (userAnswers[currentQuestionIndex] !== null && userAnswers[currentQuestionIndex] !== undefined) {
@@ -235,35 +235,52 @@ function showQuestion() {
             btn.classList.add('selected');
         }
 
-        // FIXED: Handle both click and touch events for mobile support
-        const handleAnswerSelection = (e) => {
-            e.preventDefault(); // Prevent any default behavior
-            e.stopPropagation(); // Stop event bubbling
-            
-            playSfx('click');
-
-            // Store the answer
-            userAnswers[currentQuestionIndex] = ans;
-
-            // Remove all special classes from all buttons in this question
-            document.querySelectorAll('#answer-buttons .answer-btn').forEach(b => {
-                b.classList.remove('selected', 'correct-answer', 'wrong-answer');
-            });
-
-            // Add classes to show correct/wrong immediately
-            if (ans === qData.correct) {
-                btn.classList.add('correct-answer'); // Green for correct
-            } else {
-                btn.classList.add('wrong-answer'); // Red for wrong
-            }
-
-            // Also highlight the correct answer for learning
-            document.querySelectorAll('#answer-buttons .answer-btn').forEach(b => {
-                if (b.innerText === qData.correct) {
-                    b.classList.add('correct-answer');
-                }
-            });
+        // SIMPLE FIX: Use ontouchstart and onclick directly (most reliable for mobile)
+        btn.ontouchstart = function(e) {
+            e.preventDefault();
+            handleMobileAnswer(this, ans, qData.correct);
+            return false;
         };
+        
+        btn.onclick = function(e) {
+            e.preventDefault();
+            handleMobileAnswer(this, ans, qData.correct);
+            return false;
+        };
+
+        container.appendChild(btn);
+    });
+}
+
+// Simple helper function for mobile
+function handleMobileAnswer(btn, selectedAnswer, correctAnswer) {
+    playSfx('click');
+
+    // Store the answer
+    userAnswers[currentQuestionIndex] = selectedAnswer;
+
+    // Get all answer buttons in the current container
+    let allBtns = document.querySelectorAll('#answer-buttons .answer-btn');
+    
+    // Remove all special classes
+    for (let i = 0; i < allBtns.length; i++) {
+        allBtns[i].classList.remove('selected', 'correct-answer', 'wrong-answer');
+    }
+
+    // Add classes to show correct/wrong immediately
+    if (selectedAnswer === correctAnswer) {
+        btn.classList.add('correct-answer'); // Green for correct
+    } else {
+        btn.classList.add('wrong-answer'); // Red for wrong
+    }
+
+    // Also highlight the correct answer for learning
+    for (let i = 0; i < allBtns.length; i++) {
+        if (allBtns[i].innerText === correctAnswer) {
+            allBtns[i].classList.add('correct-answer');
+        }
+    }
+};
 
         // Add both click and touch events
         btn.addEventListener('click', handleAnswerSelection);
@@ -737,3 +754,4 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+

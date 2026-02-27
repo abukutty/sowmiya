@@ -206,7 +206,7 @@ function startQuiz() {
     showQuestion();
 }
 
-// UPDATED showQuestion function with green/red feedback
+// FIXED: Updated showQuestion function with proper mobile touch support
 function showQuestion() {
     let qData = questionsData[currentSubject][currentQuestionIndex];
     document.getElementById('question-count').innerText = `Question ${currentQuestionIndex + 1} of 15`;
@@ -235,14 +235,18 @@ function showQuestion() {
             btn.classList.add('selected');
         }
 
-        btn.onclick = () => {
+        // FIXED: Handle both click and touch events for mobile support
+        const handleAnswerSelection = (e) => {
+            e.preventDefault(); // Prevent any default behavior
+            e.stopPropagation(); // Stop event bubbling
+            
             playSfx('click');
 
             // Store the answer
             userAnswers[currentQuestionIndex] = ans;
 
-            // Remove all special classes from all buttons
-            document.querySelectorAll('.answer-btn').forEach(b => {
+            // Remove all special classes from all buttons in this question
+            document.querySelectorAll('#answer-buttons .answer-btn').forEach(b => {
                 b.classList.remove('selected', 'correct-answer', 'wrong-answer');
             });
 
@@ -254,12 +258,17 @@ function showQuestion() {
             }
 
             // Also highlight the correct answer for learning
-            document.querySelectorAll('.answer-btn').forEach(b => {
+            document.querySelectorAll('#answer-buttons .answer-btn').forEach(b => {
                 if (b.innerText === qData.correct) {
                     b.classList.add('correct-answer');
                 }
             });
         };
+
+        // Add both click and touch events
+        btn.addEventListener('click', handleAnswerSelection);
+        btn.addEventListener('touchstart', handleAnswerSelection, { passive: false });
+
         container.appendChild(btn);
     });
 }

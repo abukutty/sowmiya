@@ -5,7 +5,7 @@ const questionsData = {
     Science: [{ q: "What do we breathe?", a: ["Water", "Air", "Food", "Juice"], correct: "Air", img: "s1.jpeg" }, { q: "Where does the sun rise?", a: ["West", "East", "North", "South"], correct: "East", img: "s2.jpeg" }, { q: "How many legs does a spider have?", a: ["6", "8", "10", "4"], correct: "8", img: "s3.jpeg" }, { q: "Which is a living thing?", a: ["Stone", "Tree", "Car", "Doll"], correct: "Tree", img: "s4.jpeg" }, { q: "What do bees make?", a: ["Milk", "Honey", "Water", "Sugar"], correct: "Honey", img: "s5.jpeg" }, { q: "Which planet do we live on?", a: ["Mars", "Jupiter", "Earth", "Saturn"], correct: "Earth", img: "s6.jpeg" }, { q: "What color are leaves usually?", a: ["Blue", "Red", "Green", "Yellow"], correct: "Green", img: "s7.jpeg" }, { q: "Which part of the body helps us see?", a: ["Ears", "Nose", "Eyes", "Hand"], correct: "Eyes", img: "s8.jpeg" }, { q: "What does ice turn into when it melts?", a: ["Gas", "Water", "Rock", "Snow"], correct: "Water", img: "s9.jpeg" }, { q: "Which animal gives us milk?", a: ["Dog", "Cow", "Cat", "Lion"], correct: "Cow", img: "s10.jpeg" }, { q: "What is the giant star in our system?", a: ["Moon", "Earth", "Sun", "Mars"], correct: "Sun", img: "s11.jpeg" }, { q: "Which part of a plant is under the ground?", a: ["Leaf", "Flower", "Roots", "Stem"], correct: "Roots", img: "s12.jpeg" }, { q: "How many senses do humans have?", a: ["3", "4", "5", "6"], correct: "5", img: "s13.jpeg" }, { q: "Fish breathe through their...?", a: ["Lungs", "Gills", "Nose", "Mouth"], correct: "Gills", img: "s14.jpeg" }, { q: "Which animal can fly?", a: ["Dog", "Bird", "Pig", "Tiger"], correct: "Bird", img: "s15.jpeg" }],
     Tamil: [{ q: "தமிழ் மொழியின் முதல் எழுத்து எது?", a: ["ஆ", "அ", "இ", "ஈ"], correct: "அ", img: "tamil1.jpg" }, { q: "உயிர் எழுத்துக்கள் மொத்தம் எத்தனை?", a: ["10", "12", "18", "216"], correct: "12", img: "tamil2.jpg" }, { q: "மெய் எழுத்துக்கள் மொத்தம் எத்தனை?", a: ["12", "15", "18", "20"], correct: "18", img: "tamil3.jpeg" }, { q: "ஆயுத எழுத்து எது?", a: ["அ", "ஆ", "ஃ", "இ"], correct: "ஃ", img: "tamil4.jpg" }, { q: "நமது மாநிலம் எது?", a: ["கேரளா", "தமிழ்நாடு", "மும்பை", "டெல்லி"], correct: "தமிழ்நாடு", img: "tamil5.png" }, { q: "முக்கனிகள் எவை?", a: ["ஆப்பிள், ஆரஞ்சு", "மா, பலா, வாழை", "திராட்சை", "கொய்யா"], correct: "மா, பலா, வாழை", img: "tamil6.jpg" }, { q: "காட்டில் ராஜா யார்?", a: ["யானை", "புலி", "சிங்கம்", "கரடி"], correct: "சிங்கம்", img: "tamil7.jpg" }, { q: "தமிழ்நாட்டின் மாநில விலங்கு எது?", a: ["புலி", "சிங்கம்", "வரையாடு", "யானை"], correct: "வரையாடு", img: "tamil8.jpg" }, { q: "தேசியப் பறவை எது?", a: ["காகம்", "மயில்", "கிளி", "குயில்"], correct: "மயில்", img: "tamil9.webp" }, { q: "வாரம் எத்தனை நாட்கள்?", a: ["5", "6", "7", "8"], correct: "7", img: "tamil10.webp" }, { q: "இரவில் வானில் தெரிவது எது?", a: ["சூரியன்", "நிலா", "மேகம்", "மழை"], correct: "நிலா", img: "tamil11.jpg" }, { q: "பழங்களின் அரசன்?", a: ["மாம்பழம்", "வாழைப்பழம்", "ஆப்பிள்", "பலா"], correct: "மாம்பழம்", img: "tamil12.avif" }, { q: "நமக்கு பால் தரும் விலங்கு?", a: ["நாய்", "பூனை", "பசு", "சிங்கம்"], correct: "பசு", img: "tamil13.png" }, { q: "தேன் தரும் பூச்சி எது?", a: ["எறும்பு", "தேனீ", "வண்டு", "ஈ"], correct: "தேனீ", img: "tamil14.jpg" }, { q: "கண் எத்தனை?", a: ["1", "2", "3", "4"], correct: "2", img: "tamil15.avif" }],
     GK: [{ q: "How many colors in a rainbow?", a: ["5", "6", "7", "8"], correct: "7", img: "gk1.jpeg" }, { q: "Who is the Prime Minister of India?", a: ["Rahul Gandhi", "Narendra Modi", "Amit Shah", "Nehru"], correct: "Narendra Modi", img: "gk2.jpeg" }, { q: "Which is the festival of colors?", a: ["Diwali", "Holi", "Eid", "Pongal"], correct: "Holi", img: "gk3.jpeg" }, { q: "How many hours in a day?", a: ["12", "24", "48", "60"], correct: "24", img: "gk4.jpeg" }, { q: "Which animal is known as ship of desert?", a: ["Horse", "Camel", "Lion", "Elephant"], correct: "Camel", img: "gk5.jpeg" }, { q: "Capital of India?", a: ["Mumbai", "Chennai", "New Delhi", "Kolkata"], correct: "New Delhi", img: "gk6.jpeg" }, { q: "Which is the tallest building?", a: ["Burj Khalifa", "Eiffel Tower", "Taj Mahal", "Pentagon"], correct: "Burj Khalifa", img: "gk7.jpeg" }, { q: "How many states in India?", a: ["25", "28", "29", "30"], correct: "28", img: "gk8.jpeg" }, { q: "Who discovered zero?", a: ["Newton", "Einstein", "Aryabhatta", "Galileo"], correct: "Aryabhatta", img: "gk9.jpeg" }, { q: "National Fruit of India?", a: ["Apple", "Mango", "Banana", "Orange"], correct: "Mango", img: "gk10.jpeg" }, { q: "National Anthem singer?", a: ["Tagore", "Gandhi", "Nehru", "Azad"], correct: "Tagore", img: "gk11.jpeg" }, { q: "Which is the largest ocean?", a: ["Indian", "Atlantic", "Pacific", "Arctic"], correct: "Pacific", img: "gk12.jpeg" }, { q: "How many wonders in the world?", a: ["5", "6", "7", "8"], correct: "7", img: "gk13.jpeg" }, { q: "Which is the smallest bird?", a: ["Sparrow", "Hummingbird", "Crow", "Parrot"], correct: "Hummingbird", img: "gk14.jpeg" }, { q: "Brain of computer?", a: ["RAM", "CPU", "Mouse", "Keyboard"], correct: "CPU", img: "gk15.jpeg" }]
-};
+}; // ← This closing brace was missing!
 
 // ---------- SOUNDS ----------
 function playSfx(type) {
@@ -206,7 +206,7 @@ function startQuiz() {
     showQuestion();
 }
 
-// FIXED: Updated showQuestion function with proper mobile touch support
+// UPDATED showQuestion function with green/red feedback
 function showQuestion() {
     let qData = questionsData[currentSubject][currentQuestionIndex];
     document.getElementById('question-count').innerText = `Question ${currentQuestionIndex + 1} of 15`;
@@ -219,7 +219,7 @@ function showQuestion() {
     qData.a.forEach(ans => {
         let btn = document.createElement('button');
         btn.innerText = ans;
-        btn.className = 'answer-btn'; // Use className instead of classList.add for better mobile support
+        btn.classList.add('answer-btn');
 
         // If this question was already answered, show the result
         if (userAnswers[currentQuestionIndex] !== null && userAnswers[currentQuestionIndex] !== undefined) {
@@ -235,57 +235,31 @@ function showQuestion() {
             btn.classList.add('selected');
         }
 
-        // SIMPLE FIX: Use ontouchstart and onclick directly (most reliable for mobile)
-        btn.ontouchstart = function(e) {
-            e.preventDefault();
-            handleMobileAnswer(this, ans, qData.correct);
-            return false;
+        btn.onclick = () => {
+            playSfx('click');
+
+            // Store the answer
+            userAnswers[currentQuestionIndex] = ans;
+
+            // Remove all special classes from all buttons
+            document.querySelectorAll('.answer-btn').forEach(b => {
+                b.classList.remove('selected', 'correct-answer', 'wrong-answer');
+            });
+
+            // Add classes to show correct/wrong immediately
+            if (ans === qData.correct) {
+                btn.classList.add('correct-answer'); // Green for correct
+            } else {
+                btn.classList.add('wrong-answer'); // Red for wrong
+            }
+
+            // Also highlight the correct answer for learning
+            document.querySelectorAll('.answer-btn').forEach(b => {
+                if (b.innerText === qData.correct) {
+                    b.classList.add('correct-answer');
+                }
+            });
         };
-        
-        btn.onclick = function(e) {
-            e.preventDefault();
-            handleMobileAnswer(this, ans, qData.correct);
-            return false;
-        };
-
-        container.appendChild(btn);
-    });
-}
-
-// Simple helper function for mobile
-function handleMobileAnswer(btn, selectedAnswer, correctAnswer) {
-    playSfx('click');
-
-    // Store the answer
-    userAnswers[currentQuestionIndex] = selectedAnswer;
-
-    // Get all answer buttons in the current container
-    let allBtns = document.querySelectorAll('#answer-buttons .answer-btn');
-    
-    // Remove all special classes
-    for (let i = 0; i < allBtns.length; i++) {
-        allBtns[i].classList.remove('selected', 'correct-answer', 'wrong-answer');
-    }
-
-    // Add classes to show correct/wrong immediately
-    if (selectedAnswer === correctAnswer) {
-        btn.classList.add('correct-answer'); // Green for correct
-    } else {
-        btn.classList.add('wrong-answer'); // Red for wrong
-    }
-
-    // Also highlight the correct answer for learning
-    for (let i = 0; i < allBtns.length; i++) {
-        if (allBtns[i].innerText === correctAnswer) {
-            allBtns[i].classList.add('correct-answer');
-        }
-    }
-};
-
-        // Add both click and touch events
-        btn.addEventListener('click', handleAnswerSelection);
-        btn.addEventListener('touchstart', handleAnswerSelection, { passive: false });
-
         container.appendChild(btn);
     });
 }
@@ -715,6 +689,7 @@ window.closeValidationPopup = closeValidationPopup;
 window.closeAgePopup = closeAgePopup;
 window.closeMissingDetailsPopup = closeMissingDetailsPopup;
 window.goHome = goHome;
+window.takeScreenshot = takeScreenshot;
 
 // Enhanced Enter Key Handler
 document.addEventListener('DOMContentLoaded', function () {
@@ -755,16 +730,5 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
- console.log('Testing function availability:');
-  console.log('startApp exists:', typeof startApp === 'function');
-  
-  if (typeof startApp !== 'function') {
-    console.error('ERROR: startApp function not found!');
-    console.log('Checking if script loaded:', document.querySelector('script[src="./script.js"]') ? 'Yes' : 'No');
-    
-    // Try to load script again
-    var script = document.createElement('script');
-    script.src = './script.js';
-    document.head.appendChild(script);
-    console.log('Attempting to reload script...');
-  }
+// Add this to verify script is loaded
+console.log('Script loaded successfully!');

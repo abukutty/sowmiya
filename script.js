@@ -755,3 +755,16 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+ console.log('Testing function availability:');
+  console.log('startApp exists:', typeof startApp === 'function');
+  
+  if (typeof startApp !== 'function') {
+    console.error('ERROR: startApp function not found!');
+    console.log('Checking if script loaded:', document.querySelector('script[src="./script.js"]') ? 'Yes' : 'No');
+    
+    // Try to load script again
+    var script = document.createElement('script');
+    script.src = './script.js';
+    document.head.appendChild(script);
+    console.log('Attempting to reload script...');
+  }
